@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
+# Local inputs, provider outputs, and ingestion checkpoints
+domains.txt
+intel_output.json
+global_sources/
+*.sqlite3
+bulk_ingest_checkpoint.json
+bulk_ingest_checkpoint.tmp
