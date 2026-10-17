@@ -29,17 +29,12 @@ The API is configured to disable discovery jobs and live enrichment in the hoste
 ## Streamlit Community Cloud
 
 1. Create a Streamlit Community Cloud app from branch `deployment/free-cloud`, main file `app.py`.
-2. In the app's Streamlit Cloud settings, add these values under **Secrets** in TOML format, using your actual isolated cloud database credentials:
+2. In the app's Streamlit Cloud settings, add only these values under **Secrets** in TOML format:
    ```toml
    GRAPHGUARD_API_URL = "https://YOUR-RENDER-SERVICE.onrender.com"
-   FALKORDB_HOST = "YOUR-CLOUD-GRAPH-HOST"
-   FALKORDB_PORT = "6379"
-   FALKORDB_GRAPH = "GraphGuardDemo"
-   FALKORDB_USERNAME = "YOUR-DATABASE-USERNAME"
-   FALKORDB_PASSWORD = "YOUR-DATABASE-PASSWORD"
-   FALKORDB_TLS = "true"
+   GRAPHGUARD_PUBLIC_DEMO = "true"
    ```
-   Replace all placeholders and never commit real credentials. The UI imports graph-query helpers, so it needs access to the same isolated demo graph as the API.
+   Replace the API URL with your actual Render URL. **Do not add FalkorDB credentials to Streamlit Secrets.** In public-demo mode the UI routes investigations through the API and disables direct Cypher execution and direct database probes. Keep the database credentials only in the Render service environment.
 3. Run a clean deployment smoke test; do not assume a successful build proves the graph connection works.
 
 ## Before making the URL public
