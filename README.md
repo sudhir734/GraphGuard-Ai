@@ -19,23 +19,23 @@ Traditional tabular databases force incident responders and SOC analysts to run 
 
 ```mermaid
 flowchart TD
-    User([Analyst / User]) -->|HTTP :8501| Streamlit[Streamlit UI app.py]
-    Streamlit -->|REST API :8000| FastAPI[FastAPI Backend api.py]
-    FastAPI -->|Domain Validation & Query| InvAgent[Investigation Agent investigation_agent.py]
-    FastAPI -->|Job Dispatch & Metrics| DiscEngine[Discovery Engine discovery_engine.py]
+    User(["Analyst / User"]) -->|"HTTP :8501"| Streamlit["Streamlit UI (app.py)"]
+    Streamlit -->|"REST API :8000"| FastAPI["FastAPI Backend (api.py)"]
+    FastAPI -->|"Domain Validation & Query"| InvAgent["Investigation Agent (investigation_agent.py)"]
+    FastAPI -->|"Job Dispatch & Metrics"| DiscEngine["Discovery Engine (discovery_engine.py)"]
 
-    DiscEngine -->|Passive Collection| Providers[Passive Intel Adapters real_intel.py]
-    Providers -->|crt.sh CT / Cloudflare DoH / RDAP / URLhaus| OpenIntel[(Open Public Sources)]
-    DiscEngine -->|Staged Candidate Queue| SQLite[(SQLite global_discovery.sqlite3)]
-    DiscEngine -->|MERGE Graph Entities| FalkorDB[(FalkorDB GraphGuard :6379)]
+    DiscEngine -->|"Passive Collection"| Providers["Passive Intel Adapters (real_intel.py)"]
+    Providers -->|"crt.sh CT / Cloudflare DoH / RDAP / URLhaus"| OpenIntel[("Open Public Sources")]
+    DiscEngine -->|"Staged Candidate Queue"| SQLite[("SQLite global_discovery.sqlite3")]
+    DiscEngine -->|"MERGE Graph Entities"| FalkorDB[("FalkorDB GraphGuard :6379")]
 
-    InvAgent -->|Bounded OpenCypher Reads| GraphQueries[Graph Query Layer graph_queries.py]
-    GraphQueries -->|MATCH (Domain)-[r]-(Target)| FalkorDB
+    InvAgent -->|"Bounded OpenCypher Reads"| GraphQueries["Graph Query Layer (graph_queries.py)"]
+    GraphQueries -->|"OpenCypher MATCH (Domain)-[r]-(Target)"| FalkorDB
 
-    GraphQueries -->|Nodes, Edges, Evidence| InvAgent
-    InvAgent -->|Evidence Report + Status + Verdict| FastAPI
-    FastAPI -->|Structured JSON| Streamlit
-    Streamlit -->|Interactive Graph & Evidence Workspace| User
+    GraphQueries -->|"Nodes, Edges, Evidence"| InvAgent
+    InvAgent -->|"Evidence Report + Status + Verdict"| FastAPI
+    FastAPI -->|"Structured JSON"| Streamlit
+    Streamlit -->|"Interactive Graph & Evidence Workspace"| User
 ```
 
 ## Implemented Features vs Planned Features
