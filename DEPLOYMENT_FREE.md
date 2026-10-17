@@ -49,3 +49,26 @@ The API is configured to disable discovery jobs and live enrichment in the hoste
 ## Rollback
 
 Disable the Render service and/or Streamlit app. The local app and production graph remain separate. Do not use graph deletion or flush commands as a rollback mechanism.
+
+
+## Experimental no-card host: Blitz Cloud (not yet validated)
+
+The following is a **candidate only** for evaluation. No Blitz app has been created and this repository has not been deployed there. Do not use it for the judging URL until the image builds and passes the smoke tests below.
+
+- `Dockerfile.blitz` is an experimental single-container image based on the official `falkordb/falkordb-server` image.
+- `blitz-start.sh` starts FalkorDB bound to `127.0.0.1:6379` only, enables a required password and AOF persistence, then starts the FastAPI service on the host-provided `PORT`.
+- Configure the host's persistent folder/volume to mount at `/var/lib/falkordb/data`. A folder that survives a container restart is not a backup; export and store backups separately.
+- Configure `FALKORDB_PASSWORD` as a strong secret in the host's encrypted environment settings. Never place it in the repository or Streamlit secrets.
+- This single-container mode intentionally uses `FALKORDB_TLS=false` only for the loopback connection inside the same container. The database port must not be exposed by the hosting platform; public traffic must terminate at the platform's HTTPS proxy and reach FastAPI only.
+- Use `GRAPHGUARD_GRAPH=GraphGuardDemo`, and keep discovery, live enrichment, and the audit API disabled.
+
+### Required validation before any deployment
+
+1. Build the image locally with Docker using `docker build -f Dockerfile.blitz -t graphguard-blitz-test .`.
+2. Run it with a local test password and a host directory mounted at `/var/lib/falkordb/data`; expose only the API port.
+3. Verify `GET /health`, `GET /health/ready`, and a stored-graph investigation using synthetic demo data.
+4. Stop and restart the container with the same mounted directory; verify the graph data remains available.
+5. Confirm FalkorDB is not reachable from outside the container and that the API does not return secrets.
+6. Check the hosting provider's current free-plan limits for persistent storage, container memory, sleeping, bandwidth, and account/card requirements before creating any app.
+
+If the upstream image does not include the expected module/server utilities, or if the host does not provide persistent folders on its no-card free plan, **stop** and revise the approach instead of deploying an untested image. The existing Render preparation files are retained as a separate fallback.
