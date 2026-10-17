@@ -16,12 +16,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # Streamlit Community Cloud exposes configured values through st.secrets.
-# Mirror only documented connection settings before importing graph helpers.
-for _secret_key in (
-    "FALKORDB_HOST", "FALKORDB_PORT", "FALKORDB_GRAPH",
-    "FALKORDB_USERNAME", "FALKORDB_PASSWORD", "FALKORDB_TLS",
-    "GRAPHGUARD_API_URL",
-):
+# In public-demo mode the UI uses only the API and does not receive graph credentials.
+for _secret_key in ("GRAPHGUARD_API_URL", "GRAPHGUARD_PUBLIC_DEMO"):
     if not os.getenv(_secret_key):
         try:
             _secret_value = st.secrets.get(_secret_key)
@@ -30,8 +26,28 @@ for _secret_key in (
         if _secret_value is not None:
             os.environ[_secret_key] = str(_secret_value)
 
+PUBLIC_DEMO_MODE = os.getenv("GRAPHGUARD_PUBLIC_DEMO", "false").strip().lower() in {
+    "1", "true", "yes", "on"
+}
+
+# Preserve local developer diagnostics, but avoid a second direct DB connection
+# from the public UI. Public investigations must pass through the API.
+if not PUBLIC_DEMO_MODE:
+    for _secret_key in (
+        "FALKORDB_HOST", "FALKORDB_PORT", "FALKORDB_GRAPH",
+        "FALKORDB_USERNAME", "FALKORDB_PASSWORD", "FALKORDB_TLS",
+    ):
+        if not os.getenv(_secret_key):
+            try:
+                _secret_value = st.secrets.get(_secret_key)
+            except Exception:
+                _secret_value = None
+            if _secret_value is not None:
+                os.environ[_secret_key] = str(_secret_value)
+
 from api_destination import validate_api_base_url
-import graph_queries
+if not PUBLIC_DEMO_MODE:
+    import graph_queries
 
 # ==========================================================
 # PAGE CONFIGURATION & METADATA
@@ -1190,8 +1206,8 @@ if target_to_run:
                         "domain": target_to_run,
                         "max_depth": max_depth if not preset_clicked else 2,
                         "max_entities": max_entities if not preset_clicked else 100,
-                        "live_enrichment": force_live_run,
-                        "auto_enrich": True,
+                        "live_enrichment": force_live_run and not PUBLIC_DEMO_MODE,
+                        "auto_enrich": not PUBLIC_DEMO_MODE,
                     },
                     timeout=30,
                     allow_redirects=False,
@@ -2920,14 +2936,17 @@ with st.expander("🏗 End-to-End System Architecture, OpenCypher Pivots & Graph
                 # FalkorDB Ping
                 falkor_latency = "—"
                 falkor_status = "▲ OFFLINE"
-                try:
-                    g = graph_queries._get_graph()
-                    t0 = time.perf_counter()
-                    g.execute_command("PING")
-                    falkor_latency = f"{(time.perf_counter() - t0)*1000:.2f} ms"
-                    falkor_status = "● ONLINE"
-                except Exception as exc:
-                    falkor_status = f"ERR: {exc}"
+                if PUBLIC_DEMO_MODE:
+                    falkor_status = "Via API health check (direct UI access disabled)"
+                else:
+                    try:
+                        g = graph_queries._get_graph()
+                        t0 = time.perf_counter()
+                        g.execute_command("PING")
+                        falkor_latency = f"{(time.perf_counter() - t0)*1000:.2f} ms"
+                        falkor_status = "● ONLINE"
+                    except Exception as exc:
+                        falkor_status = f"ERR: {exc}"
 
                 # FastAPI Ping
                 api_latency = "—"
@@ -2991,7 +3010,9 @@ with st.expander("🏗 End-to-End System Architecture, OpenCypher Pivots & Graph
         run_clicked = btn_col_run.button("▶ Execute OpenCypher Query", key="btn_run_cypher", use_container_width=True)
         explain_clicked = btn_col_explain.button("🔍 Explain Execution Plan (GraphBLAS)", key="btn_explain_cypher", use_container_width=True)
 
-        if run_clicked or explain_clicked:
+        if (run_clicked or explain_clicked) and PUBLIC_DEMO_MODE:
+            st.warning("Direct Cypher execution is disabled in the public demo. Use the evidence-backed investigation workflow; the API remains the only graph access path.")
+        elif run_clicked or explain_clicked:
             clean_q = cypher_input.strip()
             upper_q = clean_q.upper()
             forbidden = ["DELETE", "DETACH", "DROP", "CREATE", "SET", "REMOVE", "MERGE"]
