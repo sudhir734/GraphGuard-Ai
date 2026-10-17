@@ -62,6 +62,18 @@ The following is a **candidate only** for evaluation. No Blitz app has been crea
 - This single-container mode intentionally uses `FALKORDB_TLS=false` only for the loopback connection inside the same container. The database port must not be exposed by the hosting platform; public traffic must terminate at the platform's HTTPS proxy and reach FastAPI only.
 - Use `GRAPHGUARD_GRAPH=GraphGuardDemo`, and keep discovery, live enrichment, and the audit API disabled.
 
+### Free-plan fit check (checked 17 October 2026)
+
+The provider's current published free-plan documentation says:
+
+- No credit card is required to start, and the free plan has no stated time limit.
+- Automatic HTTPS is provided for app addresses.
+- Up to 5 apps, 512 MB reserved memory shared across apps/databases, and 10 GB total storage.
+- Apps sleep after 30 minutes without browser visitors and wake on the next browser visit. API clients/scripts do not wake a sleeping app, so cold-start behavior must be tested for the judging workflow.
+- Persistent kept folders survive restarts, but **kept folders are not backed up on the free plan**. Only managed databases are backed up nightly; those backups are retained for 7 nights. Do not assume the graph data folder has a provider backup.
+
+This makes Blitz a plausible no-card candidate, not a guarantee. The single-container app plus FalkorDB must fit the shared memory budget, and a persisted folder is not a substitute for backups. Export the demo graph separately before any important change. Recheck the live limits immediately before creating an app.
+
 ### Required validation before any deployment
 
 1. Build the image locally with Docker using `docker build -f Dockerfile.blitz -t graphguard-blitz-test .`.
