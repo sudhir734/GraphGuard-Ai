@@ -23,5 +23,7 @@ services:
         value: "false"
       - key: GRAPHGUARD_ALLOW_LIVE_ENRICHMENT
         value: "false"
+      - key: GRAPHGUARD_ENABLE_AUDIT_API
+        value: "false"
       - key: PYTHON_VERSION
         value: 3.12.10
