@@ -5,7 +5,7 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    healthCheckPath: /health
+    healthCheckPath: /health/ready
     envVars:
       - key: FALKORDB_HOST
         sync: false
@@ -25,5 +25,3 @@ services:
         value: "false"
       - key: GRAPHGUARD_ENABLE_AUDIT_API
         value: "false"
-      - key: PYTHON_VERSION
-        value: 3.12.10
