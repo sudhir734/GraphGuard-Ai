@@ -1,6 +1,7 @@
 """FastAPI endpoints for GraphGuard investigations and health checks."""
 
 import logging
+import os
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -14,12 +15,35 @@ from investigation_agent import DomainValidationError, graph_is_available
 
 logger = logging.getLogger("graphguard.api")
 
+
+def _env_enabled(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off", ""}:
+        return False
+    raise ValueError(f"{name} must be a boolean value.")
+
+
+def _require_feature_enabled(name: str, label: str) -> None:
+    # The deployment template disables expensive/side-effecting public actions.
+    if not _env_enabled(name, default=True):
+        raise HTTPException(
+            status_code=403,
+            detail=f"{label} is disabled on this deployment.",
+        )
+
+
 app = FastAPI(
     title="GraphGuard AI API",
-    version="1.1.0",
+    version="1.2.0",
     description=(
-        "Evidence-first cybersecurity investigation over the existing "
-        "FalkorDB graph."
+        "Evidence-first cybersecurity investigation over the configured "
+        "FalkorDB graph. Live enrichment and discovery can be disabled "
+        "for public demo deployments."
     ),
 )
 
@@ -86,25 +110,13 @@ class InvestigationResponse(BaseModel):
 class DiscoveryRunRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    seeds: list[str] = Field(
-        default_factory=list,
-        description="Seed domains to explore.",
-    )
+    seeds: list[str] = Field(default_factory=list, description="Seed domains to explore.")
     max_depth: int = Field(default=1, ge=1, le=2)
     max_domains: int = Field(default=50, ge=1, le=100)
-    scope: str | None = Field(
-        default=None,
-        description="Optional scope domain (e.g. example.com)",
-    )
-    enrich_discovered: bool = Field(
-        default=False,
-        description="Enrich discovered domains with passive intel.",
-    )
+    scope: str | None = Field(default=None, description="Optional scope domain (e.g. example.com)")
+    enrich_discovered: bool = Field(default=False, description="Enrich discovered domains with passive intel.")
     delay: float = Field(default=0.5, ge=0.0, le=5.0)
-    background: bool = Field(
-        default=True,
-        description="Run in background thread if True.",
-    )
+    background: bool = Field(default=True, description="Run in background thread if True.")
 
 
 class HealthResponse(BaseModel):
@@ -122,9 +134,7 @@ def health() -> dict[str, Any]:
         "status": "ok",
         "service": "GraphGuard AI",
         "application": {"status": "ok"},
-        "falkordb": {
-            "status": "ok" if graph_available else "unavailable",
-        },
+        "falkordb": {"status": "ok" if graph_available else "unavailable"},
     }
 
 
@@ -132,17 +142,14 @@ def health() -> dict[str, Any]:
 def readiness() -> dict[str, Any]:
     result = health()
     if result["falkordb"]["status"] != "ok":
-        raise HTTPException(
-            status_code=503,
-            detail="The application is running but FalkorDB is unavailable.",
-        )
+        raise HTTPException(status_code=503, detail="The application is running but FalkorDB is unavailable.")
     return result
 
 
 @app.post("/investigate", response_model=InvestigationResponse)
-def investigate_endpoint(
-    request: InvestigationRequest,
-) -> dict[str, Any]:
+def investigate_endpoint(request: InvestigationRequest) -> dict[str, Any]:
+    if request.live_enrichment or request.auto_enrich:
+        _require_feature_enabled("GRAPHGUARD_ALLOW_LIVE_ENRICHMENT", "Live enrichment")
     try:
         kwargs: dict[str, Any] = {
             "max_depth": request.max_depth,
@@ -151,23 +158,14 @@ def investigate_endpoint(
         }
         if request.auto_enrich:
             kwargs["auto_enrich"] = True
-        return investigate(
-            request.domain,
-            **kwargs,
-        )
+        return investigate(request.domain, **kwargs)
     except DomainValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except graph_queries.GraphQueryError as exc:
-        logger.error(
-            "Investigation failed because FalkorDB is unavailable (%s).",
-            type(exc).__name__,
-        )
-        raise HTTPException(
-            status_code=503,
-            detail="The investigation could not query the graph.",
-        ) from exc
+        logger.error("Investigation failed because FalkorDB is unavailable (%s).", type(exc).__name__)
+        raise HTTPException(status_code=503, detail="The investigation could not query the graph.") from exc
 
 
 @app.get("/discovery/metrics")
@@ -176,15 +174,16 @@ def discovery_metrics() -> dict[str, Any]:
     try:
         return discovery_engine.get_discovery_metrics()
     except Exception as exc:
-        logger.error("Failed to collect discovery metrics: %s", exc)
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve discovery metrics."
-        ) from exc
+        logger.error("Failed to collect discovery metrics (%s).", type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Failed to retrieve discovery metrics.") from exc
 
 
 @app.post("/discovery/run")
 def run_discovery(request: DiscoveryRunRequest) -> dict[str, Any]:
     """Run incremental passive domain discovery from seeds."""
+    _require_feature_enabled("GRAPHGUARD_ENABLE_DISCOVERY", "Discovery jobs")
+    if request.enrich_discovered:
+        _require_feature_enabled("GRAPHGUARD_ALLOW_LIVE_ENRICHMENT", "Live enrichment")
     try:
         if request.background:
             return discovery_engine.start_discovery_job(
@@ -206,10 +205,8 @@ def run_discovery(request: DiscoveryRunRequest) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
-        logger.error("Discovery run failed: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Discovery failed: {exc}"
-        ) from exc
+        logger.error("Discovery run failed (%s).", type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Discovery failed.") from exc
 
 
 @app.get("/discovery/status")
@@ -226,25 +223,19 @@ def audit_summary() -> dict[str, Any]:
         store = DomainBatchAuditStore(DEFAULT_DB_PATH)
         return store.get_summary_statistics()
     except Exception as exc:
-        logger.error("Failed to retrieve audit summary: %s", exc)
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve audit summary."
-        ) from exc
+        logger.error("Failed to retrieve audit summary (%s).", type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Failed to retrieve audit summary.") from exc
 
 
 @app.get("/audit/manifests")
 def audit_manifests() -> list[dict[str, Any]]:
-    """Return all registered batch audit datasets and their progress."""
+    """Return registered batch audit datasets and their progress."""
     try:
         from domain_batch_audit import DomainBatchAuditStore, DEFAULT_DB_PATH
         store = DomainBatchAuditStore(DEFAULT_DB_PATH)
         with store._connect() as conn:
-            rows = conn.execute(
-                "SELECT * FROM audit_manifests ORDER BY id DESC"
-            ).fetchall()
+            rows = conn.execute("SELECT * FROM audit_manifests ORDER BY id DESC").fetchall()
             return [dict(r) for r in rows]
     except Exception as exc:
-        logger.error("Failed to retrieve audit manifests: %s", exc)
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve audit manifests."
-        ) from exc
+        logger.error("Failed to retrieve audit manifests (%s).", type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Failed to retrieve audit manifests.") from exc
