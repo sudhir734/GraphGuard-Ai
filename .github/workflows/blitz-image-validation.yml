@@ -44,6 +44,7 @@ jobs:
           PASSWORD="$(openssl rand -hex 24)"
           echo "GRAPHGUARD_TEST_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
           docker run -d --name graphguard-ci \
+            --memory=512m --memory-swap=512m \
             -e FALKORDB_PASSWORD="$PASSWORD" \
             -e PORT=8000 \
             -v "$RUNNER_TEMP/graphguard-falkordb-data:/var/lib/falkordb/data" \
@@ -67,6 +68,9 @@ jobs:
           done
           docker logs graphguard-ci
           exit 1
+
+      - name: Record container memory footprint
+        run: docker stats --no-stream --format "Memory usage/limit: {{.MemUsage}}" graphguard-ci
 
       - name: Verify graph data survives a container restart
         shell: bash
@@ -98,6 +102,7 @@ jobs:
             "MATCH (d:Domain {name: 'persist.example'}) RETURN d.name")"
           echo "$RESULT"
           echo "$RESULT" | grep -q "persist.example"
+          docker stats --no-stream --format "Memory usage/limit after restart: {{.MemUsage}}" graphguard-ci
 
       - name: Show logs if the job fails
         if: failure()
