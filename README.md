@@ -77,6 +77,12 @@ All graph-facing entry points read `FALKORDB_HOST`, `FALKORDB_PORT`, and
 `GRAPHGUARD_API_URL` environment setting, defaulting to
 `http://127.0.0.1:8000`; the destination is not editable by UI users.
 
+## Free cloud demo deployment
+
+Deployment preparation is documented in [DEPLOYMENT_FREE.md](DEPLOYMENT_FREE.md). The `deployment/free-cloud` branch includes a Docker image and Render Blueprint for a **separate demo instance**. It deliberately disables public discovery jobs, live enrichment, and audit endpoints by default.
+
+This branch is a deployment preparation, not a live deployment. Provision a separate authenticated TLS-enabled graph database, configure provider secrets in hosting dashboards, and complete the documented smoke tests before sharing a public URL. Never point the public demo at your local or production graph.
+
 ## Windows setup and startup
 
 From the project directory, create an environment and install dependencies:
