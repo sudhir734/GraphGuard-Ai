@@ -70,6 +70,13 @@ except ValueError as exc:
     API_BASE_URL = None
     API_CONFIG_ERROR = str(exc)
 
+if PUBLIC_DEMO_MODE:
+    st.info(
+        "Public demo mode: investigations use the hosted API and stored demo graph. "
+        "Live enrichment, discovery jobs, direct database access, and direct Cypher "
+        "execution are disabled in this UI."
+    )
+
 
 def esc(value):
     return html.escape(str(value if value is not None else "—"))
