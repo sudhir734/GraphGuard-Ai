@@ -9,10 +9,15 @@ def investigate(
     domain: str,
     max_depth: int = 2,
     max_entities: int = 100,
+    live_enrichment: bool = False,
+    graph: Any = None,
 ) -> dict[str, Any]:
     """Run a validated, bounded investigation against FalkorDB."""
     return investigate_domain(
         domain,
         max_depth=max_depth,
         max_entities=max_entities,
+        live_enrichment=live_enrichment,
+        graph=graph,
     )
+

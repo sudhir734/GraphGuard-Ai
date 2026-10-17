@@ -35,6 +35,10 @@ class InvestigationRequest(BaseModel):
     )
     max_depth: int = Field(default=2, strict=True, ge=1, le=3)
     max_entities: int = Field(default=100, strict=True, ge=1, le=200)
+    live_enrichment: bool = Field(
+        default=False,
+        description="Explicitly run live passive enrichment before graph investigation.",
+    )
 
 
 class InvestigationResponse(BaseModel):
@@ -43,6 +47,8 @@ class InvestigationResponse(BaseModel):
     investigation_id: str
     target_domain: str
     investigation_timestamp: str
+    data_origin: str = "STORED_GRAPH"
+    live_enrichment_requested: bool = False
     domain: str
     found: bool
     data_availability: str
@@ -138,6 +144,7 @@ def investigate_endpoint(
             request.domain,
             max_depth=request.max_depth,
             max_entities=request.max_entities,
+            live_enrichment=request.live_enrichment,
         )
     except DomainValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -200,3 +207,35 @@ def run_discovery(request: DiscoveryRunRequest) -> dict[str, Any]:
 def discovery_status() -> dict[str, Any]:
     """Return the status and progress of any active or recent background discovery job."""
     return discovery_engine.get_job_status()
+
+
+@app.get("/audit/summary")
+def audit_summary() -> dict[str, Any]:
+    """Return aggregated coverage and audit metrics from the batch audit store."""
+    try:
+        from domain_batch_audit import DomainBatchAuditStore, DEFAULT_DB_PATH
+        store = DomainBatchAuditStore(DEFAULT_DB_PATH)
+        return store.get_summary_statistics()
+    except Exception as exc:
+        logger.error("Failed to retrieve audit summary: %s", exc)
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve audit summary."
+        ) from exc
+
+
+@app.get("/audit/manifests")
+def audit_manifests() -> list[dict[str, Any]]:
+    """Return all registered batch audit datasets and their progress."""
+    try:
+        from domain_batch_audit import DomainBatchAuditStore, DEFAULT_DB_PATH
+        store = DomainBatchAuditStore(DEFAULT_DB_PATH)
+        with store._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM audit_manifests ORDER BY id DESC"
+            ).fetchall()
+            return [dict(r) for r in rows]
+    except Exception as exc:
+        logger.error("Failed to retrieve audit manifests: %s", exc)
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve audit manifests."
+        ) from exc

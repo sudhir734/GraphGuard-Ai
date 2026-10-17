@@ -21,6 +21,8 @@ bulk_ingest_checkpoint.tmp
 # Local databases and Redis dumps
 *.db
 *.rdb
+scratch/
 
 # Allow a safe example configuration template
 !.env.example
+

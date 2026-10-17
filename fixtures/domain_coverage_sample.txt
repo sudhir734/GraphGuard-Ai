@@ -1,0 +1,64 @@
+# GraphGuard AI — Multi-Category Domain Coverage Sample Fixture
+# Category A: Valid Registered Domains
+target.com
+google.com
+github.com
+cloudflare.com
+
+# Category B: Cross-Sector Public Domains
+# Technology
+microsoft.com
+# Education
+mit.edu
+# Government
+usa.gov
+# Finance
+jpmorgan.com
+# Healthcare
+who.int
+# Media
+bbc.co.uk
+# Non-Profit
+eff.org
+
+# Category C: Subdomains Supplied by Inventories
+api.github.com
+aws.amazon.com
+mail.google.com
+portal.azure.com
+
+# Category D: Multi-Label Public Suffixes
+example.co.uk
+app.github.io
+test.gov.uk
+services.qld.gov.au
+
+# Category E: Internationalized Domain Names (IDNA / Punycode)
+xn--e1afmkfd.xn--p1ai
+испытание.рф
+
+# Category F: Normalization Edge Cases (Uppercase, Trailing Dots, Whitespace)
+TARGET.COM
+example.org.
+  cloudflare.com  
+
+# Category G: Invalid and Malformed Inputs (Should be rejected with clear errors)
+-badlabel.com
+..double.dot
+https://target.com/index.html
+target.com:443
+192.168.1.1
+co.uk
+com
+github.io
+
+# Category H: Reserved Testing & Documentation Names (RFC 2606 / RFC 6761)
+example.com
+system.invalid
+gateway.localhost
+test.test
+
+# Duplicates to verify deduplication suppression
+target.com
+google.com
+mit.edu

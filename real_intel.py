@@ -17,11 +17,18 @@ import json
 import os
 import re
 import socket
+import ssl
 import sys
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
+
+try:
+    import certifi
+    SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
+except Exception:
+    SSL_CONTEXT = ssl.create_default_context()
 
 from psl_utils import is_public_suffix, normalize_name as psl_normalize, registrable_domain
 
@@ -97,7 +104,7 @@ def get_json(url: str, accept: str = "application/json"):
         },
     )
 
-    with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+    with urlopen(request, timeout=TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
         if response.status != 200:
             raise RuntimeError(f"HTTP status {response.status}")
 
@@ -116,7 +123,7 @@ def post_json(url: str, data: dict, headers: dict | None = None):
         req_headers.update(headers)
     encoded = urlencode(data).encode("utf-8")
     request = Request(url, data=encoded, headers=req_headers)
-    with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+    with urlopen(request, timeout=TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
         if response.status != 200:
             raise RuntimeError(f"HTTP status {response.status}")
         body = response.read(2_000_000)
@@ -410,8 +417,11 @@ def collect_threat_intelligence(domain: str) -> dict:
     results = []
     errors = []
 
+    urlhaus_key = os.getenv("URLHAUS_API_KEY", "").strip()
+    headers = {"Auth-Key": urlhaus_key} if urlhaus_key else None
+
     try:
-        data = post_json(url, {"host": domain})
+        data = post_json(url, {"host": domain}, headers=headers)
         if not isinstance(data, dict):
             raise ValueError("Threat provider returned a non-object response")
 
@@ -444,6 +454,10 @@ def collect_threat_intelligence(domain: str) -> dict:
     except (HTTPError, URLError, TimeoutError, OSError, ValueError, RuntimeError) as exc:
         if isinstance(exc, HTTPError) and exc.code == 404:
             pass
+        elif isinstance(exc, HTTPError) and exc.code == 401:
+            errors.append("URLhaus: unauthenticated (Auth-Key required)")
+        elif isinstance(exc, HTTPError) and exc.code == 429:
+            errors.append("URLhaus: rate-limited (HTTP 429)")
         else:
             errors.append(f"URLhaus: {type(exc).__name__}")
 

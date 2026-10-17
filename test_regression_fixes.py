@@ -424,5 +424,57 @@ class FinalAuditRegressionTests(unittest.TestCase):
         self.assertNotIn("vis-network/standalone", content)
 
 
+class LiveInvestigationRegressionTests(unittest.TestCase):
+    def test_ssl_context_uses_certifi(self):
+        import certifi
+        import real_intel
+        self.assertIsNotNone(real_intel.SSL_CONTEXT)
+        self.assertTrue(real_intel.SSL_CONTEXT.check_hostname)
+
+    def test_urlhaus_handles_401_and_429_gracefully(self):
+        import real_intel
+        from urllib.error import HTTPError
+
+        # Mock 401
+        err_401 = HTTPError(
+            "https://urlhaus-api.abuse.ch/v1/host/", 401, "Unauthorized", {}, None
+        )
+        with patch("real_intel.urlopen", side_effect=err_401):
+            report = real_intel.collect_threat_intelligence("malware-example.test")
+            self.assertEqual(report["source"], "URLhaus")
+            self.assertEqual(report["status"], "unavailable")
+            self.assertIn("Auth-Key required", report.get("error", ""))
+
+        # Mock 429
+        err_429 = HTTPError(
+            "https://urlhaus-api.abuse.ch/v1/host/", 429, "Too Many Requests", {}, None
+        )
+        with patch("real_intel.urlopen", side_effect=err_429):
+            report = real_intel.collect_threat_intelligence("malware-example.test")
+            self.assertEqual(report["source"], "URLhaus")
+            self.assertEqual(report["status"], "unavailable")
+            self.assertIn("rate-limited", report.get("error", ""))
+
+    def test_urlhaus_injects_auth_key_when_configured(self):
+        import real_intel
+        captured_reqs = []
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured_reqs.append(req)
+            resp = Mock()
+            resp.status = 200
+            resp.read.return_value = b'{"query_status": "no_results"}'
+            resp.__enter__ = Mock(return_value=resp)
+            resp.__exit__ = Mock(return_value=False)
+            return resp
+
+        with patch.dict("os.environ", {"URLHAUS_API_KEY": "secret-test-key-12345"}), \
+             patch("real_intel.urlopen", side_effect=fake_urlopen):
+            report = real_intel.collect_threat_intelligence("safe-test.test")
+            self.assertEqual(len(captured_reqs), 1)
+            self.assertEqual(captured_reqs[0].get_header("Auth-key"), "secret-test-key-12345")
+
+
 if __name__ == "__main__":
     unittest.main()
+

@@ -1,0 +1,38 @@
+{
+  "version": "1.2.0",
+  "generated_at": "2026-10-17T12:33:00Z",
+  "scope_statement": "GraphGuard AI does not claim to index every domain worldwide. Datasets represent curated public samples and user-supplied inventories subject to verified coverage manifests.",
+  "datasets": [
+    {
+      "id": "tranco-top-sample",
+      "name": "Tranco Top List (Snapshot Y8JGG)",
+      "file_path": "global_sources/tranco_Y8JGG.csv",
+      "source_url": "https://tranco-list.eu/",
+      "retrieval_timestamp": "2026-10-16T19:24:41Z",
+      "snapshot_id": "Y8JGG",
+      "file_size_bytes": 110806786,
+      "sha256_prefix": "a328bac2cd9b1a19f2debdfb330bd77b8fb3473e21de0843d35fad861e2cd1ee",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "usage_restrictions": "Research and non-invasive passive observation only. Not a complete list of all internet domains; sampled by website popularity rankings.",
+      "total_input_records": 4567374,
+      "unique_staged_domains": 4173595,
+      "imported_to_falkordb": 10000,
+      "pending_import": 4163595,
+      "status": "STAGED_READY"
+    },
+    {
+      "id": "domain-coverage-sample",
+      "name": "Multi-Category Domain Coverage Sample Fixture",
+      "file_path": "fixtures/domain_coverage_sample.txt",
+      "source_url": "local://fixtures/domain_coverage_sample.txt",
+      "retrieval_timestamp": "2026-10-17T12:31:00Z",
+      "version": "1.0.0",
+      "file_size_bytes": 1193,
+      "sha256": "6c520dca978d585055e76b6a0810733dd98fe73982186c913d371c578da10c76",
+      "license": "MIT",
+      "usage_restrictions": "Authorized test fixture for unit, integration, and regression testing across Categories A through L.",
+      "total_input_records": 64,
+      "status": "ACTIVE_FIXTURE"
+    }
+  ]
+}

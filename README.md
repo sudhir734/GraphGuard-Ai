@@ -49,6 +49,17 @@ flowchart TD
 | **Security & Privacy** | Automatic property redaction (API keys, cookies, auth tokens), localhost binding | Multi-tenant RBAC and encrypted graph storage |
 | **Assessment Policy** | Strict decoupling of collection status from threat verdicts; conservative uncertainty | Automated defensive takedown generation |
 
+## Verification, Audit & Hackathon Reports
+
+Detailed technical documentation and audit deliverables produced for the hackathon release:
+
+- [AUDIT_FINDINGS.md](file:///C:/Users/gunna/Desktop/graphguard-ai/AUDIT_FINDINGS.md) — Technical root cause analysis of the 3.8 ms lookup vs live fetch, Windows TLS bug, and URLhaus resilience.
+- [LIVE_PIPELINE_VERIFICATION.md](file:///C:/Users/gunna/Desktop/graphguard-ai/LIVE_PIPELINE_VERIFICATION.md) — Empirical benchmarks across Cloudflare DoH, RDAP, crt.sh, and URLhaus.
+- [GRAPH_INTEGRITY_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/GRAPH_INTEGRITY_REPORT.md) — FalkorDB graph centrality proof, 10,235 node baseline integrity, and read-only verification.
+- [SECURITY_REVIEW.md](file:///C:/Users/gunna/Desktop/graphguard-ai/SECURITY_REVIEW.md) — TLS/SSL certifi policy, passive collection boundary, and credential redaction engine.
+- [DEMO_RUNBOOK.md](file:///C:/Users/gunna/Desktop/graphguard-ai/DEMO_RUNBOOK.md) — Step-by-step 5-minute demonstration script for hackathon judges.
+- [FINAL_READINESS_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/FINAL_READINESS_REPORT.md) — Hackathon Track 1 sign-off and direct answers to all 11 audit questions.
+
 ## Requirements
 
 - Python 3.10 or newer
@@ -274,6 +285,89 @@ Follow this exact sequence to present GraphGuard AI:
   > *"When an analyst initiates bounded passive discovery on an authorized seed, GraphGuard queries open public sources—crt.sh Certificate Transparency, DNS-over-HTTPS, and RDAP—without invasive scanning. It merges discovered infrastructure into FalkorDB with strict depth and budget caps, respecting scope boundaries."*
 - **[1:45 - 2:30] Evidence-Backed Investigation & Conservative Uncertainty:**
   > *"Investigating `target.com` instantly executes multi-hop OpenCypher traversals, revealing 19 specifically associated certificates and Akamai nameservers with full source provenance. Crucially, when querying an unassessed domain like `demo.example`, GraphGuard declares `NO_EVIDENCE_FOUND` with verdict `NOT_ASSESSED`. We strictly enforce: absence of evidence is never evidence of safety."*
+- **[2:30 - 3:00] Summary & Hackathon Impact:**
+  > *"By coupling FalkorDB graph traversals with conservative uncertainty policies and streaming batch audit tools, GraphGuard AI transforms noisy cyber telemetry into actionable, explainable attack-surface intelligence."*
+
+## Resumable Batch Domain Audit & Coverage Engine
+
+GraphGuard AI provides a high-throughput, crash-resilient batch testing engine (`domain_batch_audit.py`) designed to validate and audit arbitrarily large domain lists:
+
+### Core Architecture & Capabilities
+- **Streaming Pipeline:** Reads arbitrarily large input files (`.txt`, `.csv`, `.gz`) line-by-line without loading entire datasets into memory.
+- **Strict PSL Validation:** Validates domains using the Public Suffix List, categorizing inputs into `APEX_DOMAIN`, `SUBDOMAIN`, `RESERVED_TEST`, `PUBLIC_SUFFIX_REJECTED`, `INVALID_SYNTAX`, and `URL_OR_PATH_REJECTED`.
+- **Deduplication:** Normalizes and deduplicates domains while preserving the original input line and raw format.
+- **Transactional SQLite Checkpoint Store (`domain_batch_audit.sqlite3`):** Records per-domain audit telemetry and batch state. If interrupted, the audit safely resumes from the exact line where it stopped.
+- **Conservative Uncertainty Enforcement:** For every domain with zero evidence, the verdict is strictly `NOT_ASSESSED`. The system never fabricates or infers `SAFE`.
+- **Machine-Readable Exports:** Exports full audit records to CSV and JSONL formats.
+
+### CLI Usage & Modes
+```powershell
+# 1. Dry run: validate syntax, categorize inputs, detect duplicates, and estimate workload
+python domain_batch_audit.py --input fixtures/domain_coverage_sample.txt --mode dry-run
+
+# 2. Graph-only audit: perform read-only OpenCypher queries against FalkorDB
+python domain_batch_audit.py --input fixtures/domain_coverage_sample.txt --mode graph-only --export-csv results.csv --export-jsonl results.jsonl
+
+# 3. Retest from beginning: ignore existing checkpoints
+python domain_batch_audit.py --input fixtures/domain_coverage_sample.txt --mode graph-only --retest
+
+# 4. Live passive investigation with rate limiting:
+python domain_batch_audit.py --input domains.txt --mode live-passive --delay 1.0 --timeout 8.0
+
+# 5. High-throughput mock load testing (10,000 domains):
+python domain_batch_audit.py --input large_sample.txt --mode mock --batch-size 1000
+```
+
+### Scale Benchmark Results
+- **100 Domains:** ~0.5s execution, verified deduplication and export integrity.
+- **1,000 Domains:** ~4.5s execution, verified interrupted resumption and checkpoint recovery.
+- **10,000 Domains:** 28.4s – 55.3s execution (**180 – 352 domains/sec**), flat RAM footprint (<80 MB RSS).
+
+## Representative FalkorDB Cypher Queries
+
+GraphGuard AI executes optimized, parameterized OpenCypher queries against FalkorDB:
+
+1. **Multi-Hop Evidence Traversal:**
+   ```cypher
+   MATCH (d:Domain {name: $domain})-[r1:HAS_OBSERVATION]->(o:Observation)
+   OPTIONAL MATCH (o)-[r2:DESCRIBES_CERTIFICATE]->(c:Certificate)
+   OPTIONAL MATCH (o)-[r3:MENTIONS_NAMESERVER]->(ns:Nameserver)
+   RETURN d.name, o.kind, o.value, type(r2), c.issuer, type(r3), ns.name
+   LIMIT $row_limit
+   ```
+
+2. **Shared Infrastructure Pivoting:**
+   ```cypher
+   MATCH (d1:Domain)-[:HAS_NAMESERVER]->(ns:Nameserver)<-[:HAS_NAMESERVER]-(d2:Domain)
+   WHERE d1.name <> d2.name
+   RETURN d1.name, ns.name, d2.name
+   LIMIT 50
+   ```
+
+3. **Threat Report Association:**
+   ```cypher
+   MATCH (d:Domain {name: $domain})-[r:ASSOCIATED_WITH]->(rep:Report)
+   RETURN d.name, rep.id, rep.threat_type, rep.confidence, rep.threat_status
+   ```
+
+## Example Investigation: Real Observed Results (`target.com`)
+
+Querying `POST /investigate` with `{"domain": "target.com", "max_depth": 2}` returns:
+
+- **Investigation Status:** `INVESTIGATED`
+- **Data Availability:** `AVAILABLE`
+- **PSL Registered Apex:** `target.com`
+- **Associated TLS Certificates (19):** DigiCert SHA2 Secure Server CA issued certificates (validity bounds verified)
+- **Associated Nameservers (4):** `ns1-168.akam.net`, `ns4-65.akam.net`, `ns5-65.akam.net`, `ns7-64.akam.net`
+- **Observed Sources:** `RDAP`, `crt.sh Certificate Transparency`
+- **Assessment Verdict:** `NOT_ASSESSED` (Zero reputation records is not proof of safety; conservative uncertainty policy enforced)
+- **Response Latency:** 48 ms
+
+## Hackathon AI-Assistance Disclosure
+
+In accordance with FalkorDB Graph Hacks 2026 rules:
+- **AI Tools Used:** AI assistants were utilized for unit test generation, code audit assistance, documentation formatting, and Cypher query double-checking.
+- **Human Leadership & Verification:** System architecture, database constraints, security boundaries, and validation of all test results were reviewed, executed, and confirmed by the engineering team.
 
 ## Data Safety & Environment Configuration Notes
 

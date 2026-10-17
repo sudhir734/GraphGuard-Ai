@@ -339,6 +339,51 @@ class ApiValidationTests(unittest.TestCase):
         self.assertEqual(result["application"]["status"], "ok")
         self.assertEqual(result["falkordb"]["status"], "unavailable")
 
+    def test_request_supports_live_enrichment_field(self):
+        req = api.InvestigationRequest(domain="target.test", live_enrichment=True)
+        self.assertTrue(req.live_enrichment)
+
+        req_default = api.InvestigationRequest(domain="target.test")
+        self.assertFalse(req_default.live_enrichment)
+
+    @patch("api.investigate")
+    def test_investigate_endpoint_forwards_live_enrichment(self, mock_investigate):
+        mock_investigate.return_value = {
+            "investigation_id": "test-id",
+            "target_domain": "target.test",
+            "investigation_timestamp": "2026-10-17T00:00:00Z",
+            "data_origin": "LIVE_PASSIVE",
+            "live_enrichment_requested": True,
+            "domain": "target.test",
+            "found": False,
+            "data_availability": "NOT_FOUND",
+            "investigation_status": "NOT_FOUND",
+            "discovery_status": "NOT_RECORDED",
+            "enrichment_status": "NOT_RECORDED",
+            "enrichment_outcome": "NOT_RECORDED",
+            "enrichment_sources": [],
+            "assessment": {"verdict": "NOT_FOUND"},
+            "nodes": [],
+            "edges": [],
+            "evidence": [],
+            "observed_entities": [],
+            "relationship_paths": [],
+            "shared_infrastructure": [],
+            "findings": [],
+            "timeline": [],
+            "missing_information": [],
+            "errors": [],
+            "explanation": "No matching domain",
+            "limitations": [],
+            "query_metadata": {},
+        }
+        req = api.InvestigationRequest(domain="target.test", live_enrichment=True)
+        resp = api.investigate_endpoint(req)
+        self.assertEqual(resp["data_origin"], "LIVE_PASSIVE")
+        self.assertTrue(resp["live_enrichment_requested"])
+        mock_investigate.assert_called_once_with("target.test", max_depth=2, max_entities=100, live_enrichment=True)
+
 
 if __name__ == "__main__":
     unittest.main()
+

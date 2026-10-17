@@ -396,6 +396,11 @@ with st.form("investigation", clear_on_submit=False):
             value=100,
             step=1,
         )
+    live_enrichment = st.checkbox(
+        "◈ Run Live Passive Enrichment (query DNS, RDAP & CT if unindexed or re-enriching)",
+        value=False,
+        help="When checked, performs safe passive intelligence collection (DNS DoH, RDAP, CT) before querying FalkorDB.",
+    )
     submitted = st.form_submit_button(
         "◈  INVESTIGATE DOMAIN",
         use_container_width=True,
@@ -420,8 +425,9 @@ if submitted:
                         "domain": domain,
                         "max_depth": max_depth,
                         "max_entities": max_entities,
+                        "live_enrichment": live_enrichment,
                     },
-                    timeout=20,
+                    timeout=30,
                     allow_redirects=False,
                 )
                 response.raise_for_status()
@@ -503,6 +509,12 @@ else:
     edges = result.get("edges") or []
     evidence = result.get("evidence") or []
     found = bool(result.get("found"))
+
+    origin = result.get("data_origin", "STORED_GRAPH")
+    if origin == "LIVE_PASSIVE":
+        st.success("🟢 **DATA ORIGIN: LIVE PASSIVE FETCH** — Live network collection (DNS DoH, RDAP, CT) executed and synchronized with FalkorDB.")
+    else:
+        st.info("⚡ **DATA ORIGIN: FALKORDB STORED GRAPH** — Fast local graph index traversal. No live network requests were made.")
 
     m1, m2, m3, m4 = st.columns(4)
 

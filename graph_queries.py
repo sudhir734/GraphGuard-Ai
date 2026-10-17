@@ -295,6 +295,7 @@ def investigate_domain(
     domain: str,
     max_depth: int = 2,
     max_entities: int = 100,
+    graph: Any = None,
 ) -> dict:
     """
     Investigate a domain already present in the graph.
@@ -327,7 +328,7 @@ def investigate_domain(
             "edges": [],
             "evidence": [],
             "limitations": ["No domain was provided."],
-            "query_metadata": {"graph": _active_graph_name()},
+            "query_metadata": {"graph": getattr(graph, "name", _active_graph_name())},
         }
 
     # Avoid accepting whitespace-containing search input.
@@ -341,7 +342,7 @@ def investigate_domain(
             "limitations": [
                 "The domain input contains whitespace."
             ],
-            "query_metadata": {"graph": _active_graph_name()},
+            "query_metadata": {"graph": getattr(graph, "name", _active_graph_name())},
         }
 
     root_query = """
@@ -354,7 +355,7 @@ def investigate_domain(
 
     row_limit = min(MAX_GRAPH_ROWS, max_entities * 5)
     try:
-        graph = _get_graph()
+        graph = graph or _get_graph()
         root_result = graph.query(root_query, {"domain": domain})
         root_rows = root_result.result_set
         if not root_rows:
