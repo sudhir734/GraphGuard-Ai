@@ -10,6 +10,7 @@ def investigate(
     max_depth: int = 2,
     max_entities: int = 100,
     live_enrichment: bool = False,
+    auto_enrich: bool = False,
     graph: Any = None,
 ) -> dict[str, Any]:
     """Run a validated, bounded investigation against FalkorDB."""
@@ -18,6 +19,7 @@ def investigate(
         max_depth=max_depth,
         max_entities=max_entities,
         live_enrichment=live_enrichment,
+        auto_enrich=auto_enrich,
         graph=graph,
     )
 

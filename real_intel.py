@@ -215,6 +215,86 @@ def collect_dns(domain: str) -> dict:
     }
 
 
+def collect_google_dns(domain: str) -> dict:
+    """
+    Query Google Public DNS over HTTPS (DoH) via https://dns.google/resolve.
+    Provides dual-resolver consensus alongside Cloudflare DNS, exposing fast-flux
+    or geo-targeted DNS evasion.
+    """
+    results = []
+    failed_queries = 0
+    completed_queries = 0
+    errors = []
+
+    for record_type, record_number in DNS_TYPES.items():
+        params = urlencode({"name": domain, "type": record_type})
+        url = f"https://dns.google/resolve?{params}"
+
+        try:
+            data = get_json(url, "application/dns-json")
+            if not isinstance(data, dict):
+                raise ValueError("Google DNS returned a non-object response")
+            status = data.get("Status")
+
+            if status not in (0, 3):
+                failed_queries += 1
+                errors.append(f"{record_type}: resolver status {status}")
+                continue
+            completed_queries += 1
+
+            answers = data.get("Answer", [])
+            if not isinstance(answers, list):
+                raise ValueError("Google DNS returned invalid answers")
+            for answer in answers:
+                if not isinstance(answer, dict):
+                    continue
+                value = str(answer.get("data", "")).strip()
+
+                if not value:
+                    continue
+
+                if record_type in {"A", "AAAA"}:
+                    try:
+                        address = ipaddress.ip_address(value)
+                    except ValueError:
+                        continue
+
+                    if (record_type == "A") != (address.version == 4):
+                        continue
+
+                results.append(
+                    observation(
+                        "Google Public DNS",
+                        f"DNS_{record_type}",
+                        value,
+                        {
+                            "ttl": answer.get("TTL"),
+                            "record_type_number": record_number,
+                            "resolver_status": status,
+                            "provider": "Google Public DNS",
+                        },
+                    )
+                )
+
+        except (HTTPError, URLError, TimeoutError, OSError,
+                ValueError, RuntimeError) as exc:
+            failed_queries += 1
+            errors.append(f"{record_type}: {type(exc).__name__}")
+            continue
+
+    if failed_queries:
+        status = "partial" if completed_queries or results else "unavailable"
+    else:
+        status = "success" if results else "no_records"
+
+    return {
+        "source": "Google Public DNS",
+        "status": status,
+        "observations": results,
+        **({"error": "; ".join(errors[:3])} if errors else {}),
+    }
+
+
 def collect_rdap(domain: str) -> dict:
     url = f"https://rdap.org/domain/{quote(domain, safe='.-')}"
 
@@ -595,6 +675,7 @@ def collect_intelligence(domain_input: str, scope_domain: str | None = None) -> 
     # Failures from one source do not erase results from others.
     sources = [
         collect_dns(domain),
+        collect_google_dns(domain),
         collect_rdap(domain),
         collect_certificates(domain),
         collect_threat_intelligence(domain),

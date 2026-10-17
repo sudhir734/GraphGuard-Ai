@@ -383,6 +383,19 @@ class ApiValidationTests(unittest.TestCase):
         self.assertTrue(resp["live_enrichment_requested"])
         mock_investigate.assert_called_once_with("target.test", max_depth=2, max_entities=100, live_enrichment=True)
 
+    @patch("api.investigate")
+    def test_investigate_endpoint_forwards_auto_enrich(self, mock_investigate):
+        mock_investigate.return_value = {
+            "target_domain": "new-domain.test",
+            "data_origin": "LIVE_PASSIVE",
+        }
+        req = api.InvestigationRequest(domain="new-domain.test", auto_enrich=True)
+        resp = api.investigate_endpoint(req)
+        self.assertEqual(resp["data_origin"], "LIVE_PASSIVE")
+        mock_investigate.assert_called_once_with(
+            "new-domain.test", max_depth=2, max_entities=100, live_enrichment=False, auto_enrich=True
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

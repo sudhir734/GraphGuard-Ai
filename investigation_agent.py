@@ -192,11 +192,66 @@ def _shared_infrastructure(
     return findings
 
 
+def _perform_live_enrichment(normalized_domain: str, graph_conn: Any):
+    import real_intel
+    import injest_intel
+
+    intel_report = real_intel.collect_intelligence(normalized_domain)
+    observations = intel_report.get("observations", [])
+    sources_statuses = [
+        {"source": s.get("source"), "status": str(s.get("status", "unknown")).upper()}
+        for s in intel_report.get("sources", [])
+    ]
+
+    ingested_count = 0
+    for item in observations:
+        if isinstance(item, dict):
+            injest_intel.ingest_observation(graph_conn, normalized_domain, item)
+            ingested_count += 1
+
+    unavailable_sources = [
+        s for s in sources_statuses
+        if s["status"] in {"UNAVAILABLE", "ERROR", "TIMEOUT"}
+    ]
+    if ingested_count > 0:
+        enrichment_status = "PARTIAL" if unavailable_sources else "COLLECTED"
+        enrichment_outcome = enrichment_status
+    elif not sources_statuses or all(s["status"] == "UNAVAILABLE" for s in sources_statuses):
+        enrichment_status = "UNAVAILABLE"
+        enrichment_outcome = "UNAVAILABLE"
+    elif unavailable_sources:
+        enrichment_status = "PARTIAL"
+        enrichment_outcome = "PARTIAL_NO_OBSERVATIONS"
+    else:
+        enrichment_status = "NO_OBSERVATIONS"
+        enrichment_outcome = "NO_OBSERVATIONS"
+
+    now_str = _utc_now()
+    source_status_json = json.dumps(sources_statuses, sort_keys=True)
+    graph_conn.query("""
+        MERGE (d:Domain {name: $domain})
+        SET d.last_enriched_at = $timestamp,
+            d.enrichment_status = $enrichment_status,
+            d.enrichment_outcome = $enrichment_outcome,
+            d.enrichment_sources_json = $source_status_json,
+            d.enrichment_observation_count = $observation_count,
+            d.enrichment_verdict = 'NOT_ASSESSED'
+    """, {
+        "domain": normalized_domain,
+        "timestamp": now_str,
+        "enrichment_status": enrichment_status,
+        "enrichment_outcome": enrichment_outcome,
+        "source_status_json": source_status_json,
+        "observation_count": ingested_count,
+    })
+
+
 def investigate_domain(
     domain: str,
     max_depth: int = 2,
     max_entities: int = 100,
     live_enrichment: bool = False,
+    auto_enrich: bool = False,
     graph: Any = None,
 ) -> dict[str, Any]:
     """Return a bounded report derived from FalkorDB, optionally with live passive enrichment."""
@@ -210,69 +265,36 @@ def investigate_domain(
     normalized_domain = normalize_domain(domain)
     data_origin = "STORED_GRAPH"
 
-    if live_enrichment:
-        data_origin = "LIVE_PASSIVE"
-        import real_intel
-        import injest_intel
-        import graph_config
-
-        graph_conn = graph or graph_config.connect_graph()
-        intel_report = real_intel.collect_intelligence(normalized_domain)
-        observations = intel_report.get("observations", [])
-        sources_statuses = [
-            {"source": s.get("source"), "status": str(s.get("status", "unknown")).upper()}
-            for s in intel_report.get("sources", [])
-        ]
-
-        ingested_count = 0
-        for item in observations:
-            if isinstance(item, dict):
-                injest_intel.ingest_observation(graph_conn, normalized_domain, item)
-                ingested_count += 1
-
-        unavailable_sources = [
-            s for s in sources_statuses
-            if s["status"] in {"UNAVAILABLE", "ERROR", "TIMEOUT"}
-        ]
-        if ingested_count > 0:
-            enrichment_status = "PARTIAL" if unavailable_sources else "COLLECTED"
-            enrichment_outcome = enrichment_status
-        elif not sources_statuses or all(s["status"] == "UNAVAILABLE" for s in sources_statuses):
-            enrichment_status = "UNAVAILABLE"
-            enrichment_outcome = "UNAVAILABLE"
-        elif unavailable_sources:
-            enrichment_status = "PARTIAL"
-            enrichment_outcome = "PARTIAL_NO_OBSERVATIONS"
-        else:
-            enrichment_status = "NO_OBSERVATIONS"
-            enrichment_outcome = "NO_OBSERVATIONS"
-
-        now_str = _utc_now()
-        source_status_json = json.dumps(sources_statuses, sort_keys=True)
-        graph_conn.query("""
-            MERGE (d:Domain {name: $domain})
-            SET d.last_enriched_at = $timestamp,
-                d.enrichment_status = $enrichment_status,
-                d.enrichment_outcome = $enrichment_outcome,
-                d.enrichment_sources_json = $source_status_json,
-                d.enrichment_observation_count = $observation_count,
-                d.enrichment_verdict = 'NOT_ASSESSED'
-        """, {
-            "domain": normalized_domain,
-            "timestamp": now_str,
-            "enrichment_status": enrichment_status,
-            "enrichment_outcome": enrichment_outcome,
-            "source_status_json": source_status_json,
-            "observation_count": ingested_count,
-        })
-
     inv_kwargs = {"max_depth": max_depth, "max_entities": max_entities}
     if graph is not None:
         inv_kwargs["graph"] = graph
-    graph_report = graph_queries.investigate_domain(
-        normalized_domain,
-        **inv_kwargs,
-    )
+
+    if live_enrichment:
+        data_origin = "LIVE_PASSIVE"
+        import graph_config
+        graph_conn = graph or graph_config.connect_graph()
+        _perform_live_enrichment(normalized_domain, graph_conn)
+        graph_report = graph_queries.investigate_domain(
+            normalized_domain,
+            **inv_kwargs,
+        )
+    else:
+        graph_report = graph_queries.investigate_domain(
+            normalized_domain,
+            **inv_kwargs,
+        )
+        root = _root_node(graph_report)
+        found = bool(graph_report.get("found") and root)
+        if not found and auto_enrich:
+            data_origin = "LIVE_PASSIVE"
+            import graph_config
+            graph_conn = graph or graph_config.connect_graph()
+            _perform_live_enrichment(normalized_domain, graph_conn)
+            graph_report = graph_queries.investigate_domain(
+                normalized_domain,
+                **inv_kwargs,
+            )
+
     root = _root_node(graph_report)
     found = bool(graph_report.get("found") and root)
     evidence = graph_report.get("evidence", [])

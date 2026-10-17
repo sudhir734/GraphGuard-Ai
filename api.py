@@ -39,6 +39,10 @@ class InvestigationRequest(BaseModel):
         default=False,
         description="Explicitly run live passive enrichment before graph investigation.",
     )
+    auto_enrich: bool = Field(
+        default=False,
+        description="Automatically run live passive enrichment and store in FalkorDB if unindexed.",
+    )
 
 
 class InvestigationResponse(BaseModel):
@@ -140,11 +144,16 @@ def investigate_endpoint(
     request: InvestigationRequest,
 ) -> dict[str, Any]:
     try:
+        kwargs: dict[str, Any] = {
+            "max_depth": request.max_depth,
+            "max_entities": request.max_entities,
+            "live_enrichment": request.live_enrichment,
+        }
+        if request.auto_enrich:
+            kwargs["auto_enrich"] = True
         return investigate(
             request.domain,
-            max_depth=request.max_depth,
-            max_entities=request.max_entities,
-            live_enrichment=request.live_enrichment,
+            **kwargs,
         )
     except DomainValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc

@@ -233,6 +233,47 @@ class ProviderOutcomeTests(unittest.TestCase):
         self.assertEqual(result["status"], "partial")
         self.assertEqual(len(result["observations"]), 1)
 
+    def test_google_dns_empty_is_distinct_from_all_request_failures(self):
+        with patch.object(
+            real_intel, "get_json", return_value={"Status": 0, "Answer": []}
+        ):
+            res = real_intel.collect_google_dns("target.example")
+            self.assertEqual(res["status"], "no_records")
+            self.assertEqual(res["source"], "Google Public DNS")
+
+        with patch.object(
+            real_intel, "get_json", side_effect=TimeoutError("offline")
+        ):
+            failed = real_intel.collect_google_dns("target.example")
+        self.assertEqual(failed["status"], "unavailable")
+        self.assertEqual(failed["source"], "Google Public DNS")
+        self.assertIn("error", failed)
+
+    def test_google_dns_valid_answers_create_observations(self):
+        def fake_get_json(url, *args, **kwargs):
+            if "type=AAAA" in url:
+                return {
+                    "Status": 0,
+                    "Answer": [{"name": "target.example.", "type": 28, "TTL": 300, "data": "2001:db8::1"}],
+                }
+            if "type=A" in url:
+                return {
+                    "Status": 0,
+                    "Answer": [{"name": "target.example.", "type": 1, "TTL": 300, "data": "198.51.100.1"}],
+                }
+            return {"Status": 0, "Answer": []}
+
+        with patch.object(real_intel, "get_json", side_effect=fake_get_json):
+            result = real_intel.collect_google_dns("target.example")
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["source"], "Google Public DNS")
+        self.assertEqual(len(result["observations"]), 2)
+        kinds = [obs["kind"] for obs in result["observations"]]
+        self.assertIn("DNS_A", kinds)
+        self.assertIn("DNS_AAAA", kinds)
+        for obs in result["observations"]:
+            self.assertEqual(obs["source"], "Google Public DNS")
+
     def test_rdap_404_is_a_valid_empty_result(self):
         failure = HTTPError(
             "https://rdap.org/domain/target.example",
