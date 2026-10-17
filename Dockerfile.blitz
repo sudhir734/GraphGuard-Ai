@@ -5,7 +5,7 @@ FROM falkordb/falkordb-server:latest
 
 USER root
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 python3-venv python3-pip passwd libgomp1 findutils ca-certificates \
+    && apt-get install -y --no-install-recommends python3 python3-venv python3-pip passwd gosu libgomp1 findutils ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 1000 app \
     && useradd --uid 1000 --gid app --create-home --shell /usr/sbin/nologin app \
@@ -36,6 +36,7 @@ RUN chmod 0755 /app/blitz-start.sh
 # Blitz routes HTTP traffic to this port. FalkorDB binds only to loopback.
 EXPOSE 8000
 VOLUME ["/var/lib/falkordb/data"]
-USER 1000:1000
+# Start as root only long enough to repair mounted-volume ownership; the app processes drop to UID 1000.
+USER root
 ENTRYPOINT []
 CMD ["/app/blitz-start.sh"]
