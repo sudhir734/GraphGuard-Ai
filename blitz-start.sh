@@ -24,7 +24,12 @@ redis-server \
   --requirepass "$FALKORDB_PASSWORD" &
 REDIS_PID=$!
 
+API_PID=""
 cleanup() {
+  if [ -n "$API_PID" ]; then
+    kill "$API_PID" 2>/dev/null || true
+    wait "$API_PID" 2>/dev/null || true
+  fi
   kill "$REDIS_PID" 2>/dev/null || true
   wait "$REDIS_PID" 2>/dev/null || true
 }
@@ -50,4 +55,6 @@ if [ "$READY" -ne 1 ]; then
   exit 1
 fi
 
-exec uvicorn api:app --host 0.0.0.0 --port "$PORT"
+uvicorn api:app --host 0.0.0.0 --port "$PORT" &
+API_PID=$!
+wait "$API_PID"
