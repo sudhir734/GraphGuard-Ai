@@ -81,7 +81,7 @@ All graph-facing entry points read `FALKORDB_HOST`, `FALKORDB_PORT`, and
 
 Deployment preparation is documented in [DEPLOYMENT_FREE.md](DEPLOYMENT_FREE.md). The `deployment/free-cloud` branch includes a Docker image and Render Blueprint for a **separate demo instance**. It deliberately disables public discovery jobs, live enrichment, and audit endpoints by default.
 
-This branch is a deployment preparation, not a live deployment. Provision a separate authenticated TLS-enabled graph database, configure provider secrets in hosting dashboards, and complete the documented smoke tests before sharing a public URL. Never point the public demo at your local or production graph.
+This branch is a deployment preparation, not a live deployment. Provision a separate authenticated TLS-enabled demo graph, keep its credentials only in the API host, set `GRAPHGUARD_PUBLIC_DEMO=true` in Streamlit Cloud, and complete the documented smoke tests before sharing a public URL. In public-demo mode, the UI accesses graph data through the API and disables direct Cypher execution. Never point the public demo at your local or production graph.
 
 ## Windows setup and startup
 
