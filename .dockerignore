@@ -23,3 +23,6 @@ global_sources
 .streamlit/secrets.toml
 *.backup
 *.bak
+.local.env
+.local-data
+.local-data/
