@@ -5,7 +5,7 @@ FROM falkordb/falkordb-server:latest
 
 USER root
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 python3-venv python3-pip libgomp1 findutils ca-certificates \
+    && apt-get install -y --no-install-recommends python3 python3-venv python3-pip passwd libgomp1 findutils ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 1000 app \
     && useradd --uid 1000 --gid app --create-home --shell /usr/sbin/nologin app \
