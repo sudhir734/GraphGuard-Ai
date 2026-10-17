@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import os
 import re
 import socket
 import sys
@@ -21,6 +22,8 @@ from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
+
+from psl_utils import is_public_suffix, normalize_name as psl_normalize, registrable_domain
 
 
 USER_AGENT = "GraphGuard-AI/0.1 (public research collector)"
@@ -98,6 +101,24 @@ def get_json(url: str, accept: str = "application/json"):
         if response.status != 200:
             raise RuntimeError(f"HTTP status {response.status}")
 
+        body = response.read(2_000_000)
+        return json.loads(body.decode("utf-8"))
+
+
+def post_json(url: str, data: dict, headers: dict | None = None):
+    """Post JSON or form data to a fixed public intelligence endpoint."""
+    req_headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    if headers:
+        req_headers.update(headers)
+    encoded = urlencode(data).encode("utf-8")
+    request = Request(url, data=encoded, headers=req_headers)
+    with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        if response.status != 200:
+            raise RuntimeError(f"HTTP status {response.status}")
         body = response.read(2_000_000)
         return json.loads(body.decode("utf-8"))
 
@@ -378,15 +399,191 @@ def collect_certificates(domain: str) -> dict:
             "error": str(exc)[:200],
         }
 
-def collect_intelligence(domain_input: str) -> dict:
+
+def collect_threat_intelligence(domain: str) -> dict:
+    """
+    Collect passive public threat intelligence from open research APIs.
+    Default: URLhaus (abuse.ch) open host query.
+    Optional: AlienVault OTX (if OTX_API_KEY is configured).
+    """
+    url = "https://urlhaus-api.abuse.ch/v1/host/"
+    results = []
+    errors = []
+
+    try:
+        data = post_json(url, {"host": domain})
+        if not isinstance(data, dict):
+            raise ValueError("Threat provider returned a non-object response")
+
+        query_status = data.get("query_status")
+        if query_status == "ok":
+            url_count = int(data.get("url_count", 0))
+            tags = data.get("tags") or []
+            threat_type = data.get("threat") or "malware_distribution"
+            results.append(
+                observation(
+                    "URLhaus",
+                    "THREAT_REPORT",
+                    domain,
+                    {
+                        "report_id": f"URLHAUS-{domain}",
+                        "threat_status": data.get("host_status", "unknown"),
+                        "threat_type": threat_type,
+                        "url_count": url_count,
+                        "tags": tags,
+                        "blacklists": data.get("blacklists", {}),
+                        "reference_url": data.get("urlhaus_reference"),
+                        "confidence": 0.85 if url_count > 0 else 0.5,
+                    },
+                )
+            )
+        elif query_status == "no_results":
+            pass
+        else:
+            errors.append(f"URLhaus: {query_status}")
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError, RuntimeError) as exc:
+        if isinstance(exc, HTTPError) and exc.code == 404:
+            pass
+        else:
+            errors.append(f"URLhaus: {type(exc).__name__}")
+
+    otx_key = os.getenv("OTX_API_KEY", "").strip()
+    if otx_key:
+        otx_url = f"https://otx.alienvault.com/api/v1/indicators/domain/{quote(domain, safe='.-')}/general"
+        try:
+            otx_data = get_json(otx_url)
+            if isinstance(otx_data, dict):
+                pulse_info = otx_data.get("pulse_info", {})
+                pulse_count = pulse_info.get("count", 0)
+                if pulse_count > 0:
+                    pulses = [
+                        p.get("name")
+                        for p in pulse_info.get("pulses", [])[:5]
+                        if isinstance(p, dict) and p.get("name")
+                    ]
+                    results.append(
+                        observation(
+                            "AlienVault OTX",
+                            "THREAT_REPORT",
+                            domain,
+                            {
+                                "report_id": f"OTX-{domain}",
+                                "pulse_count": pulse_count,
+                                "pulses": pulses,
+                                "reference_url": f"https://otx.alienvault.com/indicator/domain/{domain}",
+                                "confidence": 0.8,
+                            },
+                        )
+                    )
+        except Exception as exc:
+            errors.append(f"OTX: {type(exc).__name__}")
+
+    if errors and not results:
+        status = "unavailable"
+    elif errors and results:
+        status = "partial"
+    elif results:
+        status = "success"
+    else:
+        status = "no_records"
+
+    return {
+        "source": "URLhaus",
+        "status": status,
+        "observations": results,
+        **({"error": "; ".join(errors[:2])} if errors else {}),
+    }
+
+
+def extract_discovered_candidates(
+    root_domain: str,
+    sources: list[dict],
+    scope_domain: str | None = None,
+) -> list[dict]:
+    """
+    Extract candidate domains, subdomains, and infrastructure hostnames
+    discovered passively during intelligence collection.
+    Filters out invalid names, IPs, and public suffixes.
+    """
+    candidates = {}
+
+    def consider_name(raw_name: str, source_name: str, relationship: str):
+        if not raw_name or not isinstance(raw_name, str):
+            return
+        raw_name = raw_name.strip().rstrip(".")
+        if raw_name.startswith("*."):
+            raw_name = raw_name[2:]
+        try:
+            norm = psl_normalize(raw_name)
+        except Exception:
+            return
+
+        if len(norm) > 253 or "." not in norm:
+            return
+        try:
+            ipaddress.ip_address(norm)
+            return
+        except ValueError:
+            pass
+
+        if is_public_suffix(norm) or registrable_domain(norm) is None:
+            return
+
+        if scope_domain:
+            norm_scope = scope_domain.strip().lower().rstrip(".")
+            if not (norm == norm_scope or norm.endswith("." + norm_scope)):
+                return
+
+        if norm != root_domain and norm not in candidates:
+            candidates[norm] = {
+                "domain": norm,
+                "discovered_from": root_domain,
+                "source": source_name,
+                "relationship": relationship,
+                "discovered_at": utc_now(),
+            }
+
+    for src in sources:
+        src_name = src.get("source", "Unknown")
+        for obs in src.get("observations", []):
+            kind = obs.get("kind", "")
+            val = obs.get("value")
+            details = obs.get("details", {})
+
+            if kind == "CERTIFICATE_RECORD":
+                names = val if isinstance(val, list) else [val]
+                for n in names:
+                    consider_name(str(n), src_name, "CERTIFICATE_SAN")
+
+            elif kind == "DNS_CNAME" and isinstance(val, str):
+                consider_name(val, src_name, "DNS_CNAME_TARGET")
+            elif kind == "DNS_MX" and isinstance(val, str):
+                parts = val.split()
+                if len(parts) >= 2:
+                    consider_name(parts[1], src_name, "DNS_MX_EXCHANGE")
+                else:
+                    consider_name(val, src_name, "DNS_MX_EXCHANGE")
+            elif kind == "DNS_NS" and isinstance(val, str):
+                consider_name(val, src_name, "DNS_NAMESERVER")
+
+            ns_list = details.get("nameservers", [])
+            if isinstance(ns_list, list):
+                for ns in ns_list:
+                    consider_name(str(ns), src_name, "RDAP_NAMESERVER")
+
+    return list(candidates.values())
+
+
+def collect_intelligence(domain_input: str, scope_domain: str | None = None) -> dict:
     domain = normalize_domain(domain_input)
 
-    # DNS, RDAP and certificate searches are independent.
+    # DNS, RDAP, certificate, and threat searches are independent.
     # Failures from one source do not erase results from others.
     sources = [
         collect_dns(domain),
         collect_rdap(domain),
         collect_certificates(domain),
+        collect_threat_intelligence(domain),
     ]
 
     observations = [
@@ -395,12 +592,17 @@ def collect_intelligence(domain_input: str) -> dict:
         for item in source.get("observations", [])
     ]
 
+    discovered = extract_discovered_candidates(
+        domain, sources, scope_domain=scope_domain
+    )
+
     return {
         "domain": domain,
         "collected_at": utc_now(),
         "mode": "passive_public_intelligence",
         "sources": sources,
         "observations": observations,
+        "discovered_candidates": discovered,
         "assessment": {
             "verdict": "NOT_ASSESSED",
             "reason": (

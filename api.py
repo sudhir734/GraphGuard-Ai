@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+import discovery_engine
 import graph_queries
 from backend import investigate
 from investigation_agent import DomainValidationError, graph_is_available
@@ -45,10 +46,17 @@ class InvestigationResponse(BaseModel):
     domain: str
     found: bool
     data_availability: str
+    investigation_status: str = "NOT_ASSESSED"
+    registered_domain: str | None = None
     discovery_status: str
     enrichment_status: str
     enrichment_outcome: str
     enrichment_sources: list[dict[str, Any]]
+    observed_sources: list[str] = Field(default_factory=list)
+    associated_ips: list[str] = Field(default_factory=list)
+    associated_certificates: list[dict[str, Any]] = Field(default_factory=list)
+    associated_reports: list[dict[str, Any]] = Field(default_factory=list)
+    associated_nameservers: list[str] = Field(default_factory=list)
     assessment: dict[str, Any]
     nodes: list[dict[str, Any]]
     edges: list[dict[str, Any]]
@@ -63,6 +71,30 @@ class InvestigationResponse(BaseModel):
     explanation: str
     limitations: list[str]
     query_metadata: dict[str, Any]
+
+
+class DiscoveryRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    seeds: list[str] = Field(
+        default_factory=list,
+        description="Seed domains to explore.",
+    )
+    max_depth: int = Field(default=1, ge=1, le=2)
+    max_domains: int = Field(default=50, ge=1, le=100)
+    scope: str | None = Field(
+        default=None,
+        description="Optional scope domain (e.g. example.com)",
+    )
+    enrich_discovered: bool = Field(
+        default=False,
+        description="Enrich discovered domains with passive intel.",
+    )
+    delay: float = Field(default=0.5, ge=0.0, le=5.0)
+    background: bool = Field(
+        default=True,
+        description="Run in background thread if True.",
+    )
 
 
 class HealthResponse(BaseModel):
@@ -120,3 +152,51 @@ def investigate_endpoint(
             status_code=503,
             detail="The investigation could not query the graph.",
         ) from exc
+
+
+@app.get("/discovery/metrics")
+def discovery_metrics() -> dict[str, Any]:
+    """Return real-time counts and health across FalkorDB and the discovery repository."""
+    try:
+        return discovery_engine.get_discovery_metrics()
+    except Exception as exc:
+        logger.error("Failed to collect discovery metrics: %s", exc)
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve discovery metrics."
+        ) from exc
+
+
+@app.post("/discovery/run")
+def run_discovery(request: DiscoveryRunRequest) -> dict[str, Any]:
+    """Run incremental passive domain discovery from seeds."""
+    try:
+        if request.background:
+            return discovery_engine.start_discovery_job(
+                seeds=request.seeds,
+                max_depth=request.max_depth,
+                max_domains=request.max_domains,
+                scope=request.scope,
+                enrich_discovered=request.enrich_discovered,
+                delay=request.delay,
+            )
+        return discovery_engine.discover_from_seeds(
+            seeds=request.seeds,
+            max_depth=request.max_depth,
+            max_domains=request.max_domains,
+            scope=request.scope,
+            enrich_discovered=request.enrich_discovered,
+            delay=request.delay,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error("Discovery run failed: %s", exc)
+        raise HTTPException(
+            status_code=500, detail=f"Discovery failed: {exc}"
+        ) from exc
+
+
+@app.get("/discovery/status")
+def discovery_status() -> dict[str, Any]:
+    """Return the status and progress of any active or recent background discovery job."""
+    return discovery_engine.get_job_status()

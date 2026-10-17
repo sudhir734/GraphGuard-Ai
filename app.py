@@ -247,9 +247,131 @@ st.markdown(
 )
 
 
+# -------------------- GLOBAL DISCOVERY & METRICS -------------
+
+st.markdown('<div class="section">01 / Global discovery & metrics</div>',
+            unsafe_allow_html=True)
+
+with st.expander("◈ Global Discovery Pipeline & Infrastructure Metrics", expanded=False):
+    metrics_data = None
+    if API_BASE_URL and api_online:
+        try:
+            m_resp = requests.get(f"{API_BASE_URL}/discovery/metrics", timeout=5)
+            if m_resp.status_code == 200:
+                metrics_data = m_resp.json()
+        except Exception:
+            metrics_data = None
+
+    if metrics_data:
+        def _fmt(val):
+            if isinstance(val, int):
+                return f"{val:,}"
+            return "—" if val is None else str(val)
+
+        graph_m = metrics_data.get("graph", {})
+        disc_m = metrics_data.get("discovery_repository", {})
+
+        total_d = graph_m.get("total_domains", metrics_data.get("total_domains_in_graph"))
+        investigated_d = graph_m.get("investigated_domains", metrics_data.get("investigated_domains"))
+        awaiting_d = disc_m.get("awaiting_enrichment", metrics_data.get("awaiting_investigation"))
+        sources_cnt = graph_m.get("unique_sources", metrics_data.get("unique_sources_used"))
+
+        ips_cnt = graph_m.get("total_ips", metrics_data.get("associated_ip_addresses"))
+        certs_cnt = graph_m.get("total_certificates", metrics_data.get("associated_certificates"))
+        reps_cnt = graph_m.get("total_reports", metrics_data.get("associated_threat_reports"))
+        repo_total = disc_m.get("total_discovered", metrics_data.get("staged_in_sqlite"))
+
+        st.caption("◈ **FalkorDB Global Graph Baseline** (Active Production Dataset)")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Graph Total Domains", _fmt(total_d), help="Total domain nodes currently stored in the FalkorDB GraphGuard graph")
+        c2.metric("Investigated Domains", _fmt(investigated_d), help="Domains with stored passive observations in the graph")
+        c3.metric("Awaiting Investigation", _fmt(awaiting_d), help="Domains imported into graph awaiting passive observation collection")
+        c4.metric("Unique Sources", _fmt(sources_cnt), help="Distinct passive intelligence sources linked in the graph")
+
+        st.caption("◈ **Global Infrastructure Entities & Staged Repository**")
+        c5, c6, c7, c8 = st.columns(4)
+        c5.metric("Global Graph IPs", _fmt(ips_cnt), help="Total distinct IP address nodes across all records in the graph")
+        c6.metric("Global Graph Certificates", _fmt(certs_cnt), help="Total distinct TLS Certificate nodes across all records in the graph")
+        c7.metric("Global Threat Reports", _fmt(reps_cnt), help="Total threat report nodes across all records in the graph")
+        c8.metric("Staged Candidates (SQLite)", _fmt(repo_total), help="Unique candidate domains staged in local SQLite repository from Tranco (10k imported to graph)")
+    else:
+        st.info("Discovery metrics available when backend API is reachable.")
+
+    st.markdown("---")
+    st.markdown("**Run Incremental Passive Discovery**")
+    st.caption("Expand infrastructure from seed domains using passive Certificate Transparency, DNS-over-HTTPS, and RDAP.")
+
+    with st.form("discovery_run_form", clear_on_submit=False):
+        seed_input = st.text_input(
+            "Seed Domains (comma or space-separated)",
+            placeholder="e.g. example.com, test.org",
+        )
+        col_scope, col_depth, col_budget = st.columns(3)
+        with col_scope:
+            scope_input = st.text_input(
+                "Scope Restriction (optional)",
+                placeholder="e.g. example.com",
+                help="Only discover subdomains within this apex domain.",
+            )
+        with col_depth:
+            run_depth = st.selectbox("Max Depth", options=[1, 2], index=0)
+        with col_budget:
+            run_budget = st.slider("Max Domains Budget", min_value=10, max_value=100, value=30, step=10)
+
+        enrich_cb = st.checkbox("Enrich Discovered Domains with Passive Intel", value=True)
+        disc_submitted = st.form_submit_button("◈ LAUNCH PASSIVE DISCOVERY", use_container_width=True)
+
+    if disc_submitted:
+        seeds = [s.strip().lower() for s in seed_input.replace(",", " ").split() if s.strip()]
+        if not seeds:
+            st.warning("Enter at least one valid seed domain.")
+        else:
+            try:
+                scope_val = scope_input.strip().lower() if scope_input.strip() else None
+                with st.spinner("Dispatching discovery job to backend..."):
+                    d_resp = requests.post(
+                        f"{API_BASE_URL}/discovery/run",
+                        json={
+                            "seeds": seeds,
+                            "max_depth": run_depth,
+                            "max_domains": run_budget,
+                            "scope": scope_val,
+                            "enrich_discovered": enrich_cb,
+                            "delay": 0.3,
+                            "background": True,
+                        },
+                        timeout=10,
+                    )
+                    d_resp.raise_for_status()
+                    job_info = d_resp.json()
+                    st.success(f"Discovery job dispatched! Status: {job_info.get('status', 'RUNNING')}")
+            except Exception as exc:
+                st.error(f"Failed to start discovery: {exc}")
+
+    # Job Status display
+    if API_BASE_URL and api_online:
+        try:
+            status_resp = requests.get(f"{API_BASE_URL}/discovery/status", timeout=3)
+            if status_resp.status_code == 200:
+                job_status = status_resp.json()
+                if job_status.get("status") in {"RUNNING", "COMPLETED", "FAILED"}:
+                    disc_cnt = job_status.get("discovered_count", job_status.get("discovered", 0))
+                    enr_cnt = job_status.get("enriched_count", job_status.get("enriched", 0))
+                    raw_errs = job_status.get("errors", [])
+                    err_cnt = len(raw_errs) if isinstance(raw_errs, list) else int(raw_errs)
+                    st.caption(
+                        f"Active Job Status: **{job_status.get('status')}** · "
+                        f"Discovered: {disc_cnt:,} · "
+                        f"Enriched: {enr_cnt:,} · "
+                        f"Errors: {err_cnt:,}"
+                    )
+        except Exception:
+            pass
+
+
 # ----------------------- TARGET SEARCH -----------------------
 
-st.markdown('<div class="section">01 / Target investigation</div>',
+st.markdown('<div class="section">02 / Target investigation</div>',
             unsafe_allow_html=True)
 
 with st.form("investigation", clear_on_submit=False):
@@ -365,7 +487,7 @@ if st.session_state.error:
 
 # ----------------------- RESULT WORKSPACE --------------------
 
-st.markdown('<div class="section">02 / Evidence workspace</div>',
+st.markdown('<div class="section">03 / Evidence workspace</div>',
             unsafe_allow_html=True)
 
 result = st.session_state.result
@@ -642,7 +764,7 @@ else:
             # vis-network is loaded from a public CDN by the iframe.
             graph_html = graph_html.replace(
                 "<head>",
-                '<head><script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>',
+                '<head><script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>',
             )
 
             components.html(
@@ -675,8 +797,14 @@ else:
         st.info(result.get("explanation", "No explanation returned."))
 
         assessment = result.get("assessment") or {}
+        investigation_status = result.get("investigation_status", "NOT_ASSESSED")
+        reg_domain = result.get("registered_domain")
         st.markdown(
-            f"**Assessment:** `{esc(assessment.get('verdict', 'UNKNOWN'))}`"
+            f"**Investigation Status:** `{esc(investigation_status)}` · "
+            f"**Registered Apex:** `{esc(reg_domain or '—')}`"
+        )
+        st.markdown(
+            f"**Assessment Verdict:** `{esc(assessment.get('verdict', 'UNKNOWN'))}`"
         )
         st.caption(
             assessment.get(
@@ -693,6 +821,7 @@ else:
             f"{esc(result.get('enrichment_outcome', 'UNKNOWN'))}"
         )
         enrichment_sources = result.get("enrichment_sources") or []
+        observed_sources = result.get("observed_sources") or []
         if enrichment_sources:
             st.markdown("**Passive collection provider outcomes**")
             for source in enrichment_sources:
@@ -700,6 +829,37 @@ else:
                     f"- {esc(source.get('source'))}: "
                     f"`{esc(source.get('status'))}`"
                 )
+        elif observed_sources:
+            st.markdown("**Sources observed in stored evidence**")
+            for source in observed_sources:
+                st.markdown(f"- {esc(source)}")
+
+        associated_ips = result.get("associated_ips") or []
+        associated_certs = result.get("associated_certificates") or []
+        associated_reports = result.get("associated_reports") or []
+        associated_ns = result.get("associated_nameservers") or []
+
+        if associated_ips or associated_certs or associated_reports or associated_ns:
+            target_name = result.get("target_domain", "Target")
+            with st.expander(f"Structured Connected Infrastructure for {esc(target_name)} ({len(associated_certs)} certs, {len(associated_ns)} nameservers)", expanded=True):
+                st.caption(f"Showing infrastructure entities directly connected to **{esc(target_name)}** in FalkorDB (global graph contains 46 total certificates across all indexed domains).")
+                if associated_ips:
+                    st.markdown(f"**Associated IP Addresses ({len(associated_ips)})**")
+                    for ip in associated_ips:
+                        st.markdown(f"- `{esc(ip)}`")
+                if associated_certs:
+                    st.markdown(f"**Associated TLS Certificates ({len(associated_certs)})**")
+                    for cert in associated_certs:
+                        subj = cert.get("subject") or cert.get("sha256", "—")
+                        st.markdown(f"- `{esc(subj)}` (Issuer: {esc(cert.get('issuer', '—'))})")
+                if associated_reports:
+                    st.markdown("**Associated Threat Reports**")
+                    for rep in associated_reports:
+                        st.markdown(f"- Source: `{esc(rep.get('source', '—'))}` · Threat: `{esc(rep.get('threat', '—'))}` · ID: `{esc(rep.get('id', '—'))}`")
+                if associated_ns:
+                    st.markdown("**Associated Nameservers**")
+                    for ns in associated_ns:
+                        st.markdown(f"- `{esc(ns)}`")
 
         st.markdown("**Evidence limitations**")
         limitations = result.get("limitations") or [
@@ -827,7 +987,7 @@ else:
 
 # --------------------------- HISTORY -------------------------
 
-st.markdown('<div class="section">03 / Analyst activity</div>',
+st.markdown('<div class="section">04 / Analyst activity</div>',
             unsafe_allow_html=True)
 
 with st.expander(f"Recent investigations · {len(st.session_state.history)}"):

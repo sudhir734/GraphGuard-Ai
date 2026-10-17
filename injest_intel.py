@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import graph_config
+from psl_utils import registrable_domain
 
 GRAPH_NAME = graph_config.get_graph_settings()[2]
 INPUT_FILE = Path("intel_output.json")
@@ -164,12 +165,77 @@ def ingest_observation(graph, root_domain, item):
                 WITH n
                 MATCH (o:Observation {id: $observation_id})
                 MERGE (o)-[:MENTIONS_NAMESERVER]->(n)
+                WITH n
+                MATCH (d:Domain {name: $domain})
+                MERGE (d)-[:HAS_NAMESERVER]->(n)
                 """,
                 {
                     "name": server,
                     "observation_id": observation_id,
+                    "domain": root_domain,
                 },
             )
+
+    # Link domain to PSL registered domain if this is a subdomain
+    reg_domain = registrable_domain(root_domain)
+    if reg_domain and reg_domain != root_domain:
+        query(
+            graph,
+            """
+            MERGE (rd:Domain {name: $reg_domain})
+            WITH rd
+            MATCH (d:Domain {name: $domain})
+            MERGE (d)-[:BELONGS_TO]->(rd)
+            """,
+            {"reg_domain": reg_domain, "domain": root_domain},
+        )
+
+    # DNS A and AAAA records establish direct IP resolution
+    if kind in ("DNS_A", "DNS_AAAA") and isinstance(value, str) and value.strip():
+        ip_addr = value.strip()
+        query(
+            graph,
+            """
+            MERGE (ip:IPAddress {address: $ip})
+            WITH ip
+            MATCH (d:Domain {name: $domain})
+            MERGE (d)-[:RESOLVES_TO]->(ip)
+            """,
+            {"ip": ip_addr, "domain": root_domain},
+        )
+
+    # Threat reports create explicit Report nodes and associate with the domain
+    if kind == "THREAT_REPORT":
+        report_id = str(details.get("report_id") or f"REPORT-{observation_id[:12]}")
+        query(
+            graph,
+            """
+            MERGE (r:Report {id: $report_id})
+            SET r.source = $source,
+                r.confidence = $confidence,
+                r.url_count = $url_count,
+                r.threat_type = $threat_type,
+                r.threat_status = $threat_status,
+                r.tags_json = $tags_json
+            WITH r
+            MATCH (d:Domain {name: $domain})
+            MERGE (d)-[:ASSOCIATED_WITH]->(r)
+            WITH r
+            MATCH (o:Observation {id: $observation_id})
+            MERGE (o)-[:MENTIONED_IN]->(r)
+            """,
+            {
+                "report_id": report_id,
+                "source": source_name,
+                "confidence": float(details.get("confidence", 0.7)),
+                "url_count": int(details.get("url_count", 0)),
+                "threat_type": str(details.get("threat_type", "malware")),
+                "threat_status": str(details.get("threat_status", "unknown")),
+                "tags_json": json.dumps(details.get("tags") or []),
+                "domain": root_domain,
+                "observation_id": observation_id,
+            },
+        )
 
 
 def main():

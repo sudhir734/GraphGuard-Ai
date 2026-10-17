@@ -39,6 +39,14 @@ MAX_GRAPH_ENTITIES = 200
 MAX_EVIDENCE_RECORDS = 200
 
 
+def _active_graph_name() -> str:
+    """Return the active configured graph name."""
+    try:
+        return graph_config.get_graph_settings()[2]
+    except Exception:
+        return GRAPH_NAME
+
+
 class GraphQueryError(RuntimeError):
     """Raised when the configured graph cannot answer an investigation."""
 
@@ -123,12 +131,17 @@ def _redact_property(key: str, value: Any) -> Any:
         "apikey",
         "access_key",
         "private_key",
+        "privatekey",
         "token",
         "secret",
         "password",
         "passwd",
         "authorization",
         "credential",
+        "cookie",
+        "cookies",
+        "bearer",
+        "auth",
     )
     if any(fragment in normalized_key for fragment in sensitive_fragments):
         return "[REDACTED]"
@@ -314,7 +327,7 @@ def investigate_domain(
             "edges": [],
             "evidence": [],
             "limitations": ["No domain was provided."],
-            "query_metadata": {"graph": GRAPH_NAME},
+            "query_metadata": {"graph": _active_graph_name()},
         }
 
     # Avoid accepting whitespace-containing search input.
@@ -328,7 +341,7 @@ def investigate_domain(
             "limitations": [
                 "The domain input contains whitespace."
             ],
-            "query_metadata": {"graph": GRAPH_NAME},
+            "query_metadata": {"graph": _active_graph_name()},
         }
 
     root_query = """
@@ -357,7 +370,7 @@ def investigate_domain(
                     "Absence of evidence does not establish safety.",
                 ],
                 "query_metadata": {
-                    "graph": GRAPH_NAME,
+                    "graph": _active_graph_name(),
                     "row_limit": row_limit,
                     "rows_returned": 0,
                     "max_depth": max_depth,
@@ -599,7 +612,7 @@ def investigate_domain(
                 "Absence of evidence does not establish safety.",
             ],
             "query_metadata": {
-                "graph": GRAPH_NAME,
+                "graph": _active_graph_name(),
                 "rows_limit": MAX_GRAPH_ROWS,
             },
         }
@@ -855,7 +868,7 @@ def investigate_domain(
         "evidence": evidence,
         "limitations": limitations,
         "query_metadata": {
-            "graph": GRAPH_NAME,
+            "graph": _active_graph_name(),
             "nodes_returned": len(nodes),
             "edges_returned": len(edges),
             "evidence_returned": len(evidence),

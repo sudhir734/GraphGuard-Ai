@@ -10,3 +10,17 @@ global_sources/
 *.sqlite3
 bulk_ingest_checkpoint.json
 bulk_ingest_checkpoint.tmp
+
+# Backup files, logs, and environment configurations
+*.backup.py
+*.bak
+*.log
+.env
+.env.*
+
+# Local databases and Redis dumps
+*.db
+*.rdb
+
+# Allow a safe example configuration template
+!.env.example

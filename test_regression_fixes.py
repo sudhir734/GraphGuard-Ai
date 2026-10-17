@@ -347,5 +347,82 @@ class DemoSeedGuardTests(unittest.TestCase):
         graph.query.assert_called_once()
 
 
+class FinalAuditRegressionTests(unittest.TestCase):
+    def test_observed_sources_distinguished_from_run_sources(self):
+        import investigation_agent
+        report = {
+            "domain": "target.test",
+            "found": True,
+            "nodes": [
+                {
+                    "id": "n:1",
+                    "label": "target.test",
+                    "type": "Domain",
+                    "labels": ["Domain"],
+                    "properties": {
+                        "name": "target.test",
+                        "enrichment_status": "COLLECTED",
+                    },
+                }
+            ],
+            "edges": [],
+            "evidence": [
+                {
+                    "domain": "target.test",
+                    "observation_id": "obs-1",
+                    "kind": "CERTIFICATE_RECORD",
+                    "sources": ["crt.sh Certificate Transparency"],
+                    "source_records": [{"name": "crt.sh Certificate Transparency"}],
+                }
+            ],
+            "limitations": [],
+            "query_metadata": {"graph": "GraphGuard"},
+        }
+        with patch.object(
+            investigation_agent.graph_queries,
+            "investigate_domain",
+            return_value=report,
+        ):
+            res = investigation_agent.investigate_domain("target.test")
+        self.assertEqual(res["enrichment_sources"], [])
+        self.assertEqual(
+            res["observed_sources"],
+            ["crt.sh Certificate Transparency"],
+        )
+        self.assertIn(
+            "Provider execution details for the enrichment run were not recorded in the graph.",
+            res["missing_information"],
+        )
+
+    def test_redaction_includes_cookie_bearer_auth_privatekey(self):
+        props = {
+            "cookie": "session_val",
+            "cookies": ["a", "b"],
+            "bearer_token": "bearer123",
+            "privatekey": "pem_data",
+            "auth_code": "auth123",
+            "safe_key": "safe_val",
+        }
+        cleaned = graph_queries._safe_properties(props)
+        self.assertEqual(cleaned["cookie"], "[REDACTED]")
+        self.assertEqual(cleaned["cookies"], "[REDACTED]")
+        self.assertEqual(cleaned["bearer_token"], "[REDACTED]")
+        self.assertEqual(cleaned["privatekey"], "[REDACTED]")
+        self.assertEqual(cleaned["auth_code"], "[REDACTED]")
+        self.assertEqual(cleaned["safe_key"], "safe_val")
+
+    def test_dynamic_active_graph_name_in_query_metadata(self):
+        with patch.dict("os.environ", {"FALKORDB_GRAPH": "GraphGuardTestEnv"}):
+            self.assertEqual(graph_queries._active_graph_name(), "GraphGuardTestEnv")
+            res = graph_queries.investigate_domain("")
+            self.assertEqual(res["query_metadata"]["graph"], "GraphGuardTestEnv")
+
+    def test_vis_network_cdn_script_is_pinned(self):
+        app_path = Path(__file__).with_name("app.py")
+        content = app_path.read_text(encoding="utf-8")
+        self.assertIn("vis-network@9.1.9", content)
+        self.assertNotIn("vis-network/standalone", content)
+
+
 if __name__ == "__main__":
     unittest.main()

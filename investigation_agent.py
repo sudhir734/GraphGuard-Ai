@@ -275,6 +275,76 @@ def investigate_domain(
         for item in evidence
         if item.get("observation_id") is not None
     })
+    observed_sources = sorted({
+        str(src)
+        for item in evidence
+        for src in item.get("sources", [])
+        if src
+    })
+
+    if not found:
+        investigation_status = "NOT_FOUND"
+    elif not evidence:
+        investigation_status = "NO_EVIDENCE_FOUND"
+    elif enrichment_sources and all(
+        item.get("status") in {"FAILED", "UNAVAILABLE", "ERROR", "TIMEOUT"}
+        for item in enrichment_sources
+    ):
+        investigation_status = "SOURCE_UNAVAILABLE"
+    elif enrichment_status == "COMPLETED" or enrichment_outcome == "SUCCESS":
+        investigation_status = "INVESTIGATED"
+    elif enrichment_status in {"PARTIAL", "PARTIALLY_COMPLETED"} or enrichment_outcome == "PARTIAL":
+        investigation_status = "PARTIALLY_ASSESSED"
+    elif enrichment_sources and any(
+        item.get("status") == "SUCCESS" for item in enrichment_sources
+    ) and any(
+        item.get("status") in {"FAILED", "UNAVAILABLE", "ERROR", "TIMEOUT"}
+        for item in enrichment_sources
+    ):
+        investigation_status = "PARTIALLY_ASSESSED"
+    elif evidence:
+        investigation_status = "INVESTIGATED"
+    else:
+        investigation_status = "NOT_ASSESSED"
+
+    associated_ips: list[str] = []
+    associated_certificates: list[dict[str, Any]] = []
+    associated_reports: list[dict[str, Any]] = []
+    associated_nameservers: list[str] = []
+
+    for node in graph_report.get("nodes", []):
+        labels = set(node.get("labels", []))
+        props = node.get("properties") or {}
+        if "IPAddress" in labels:
+            ip_val = props.get("address") or props.get("ip") or props.get("value") or props.get("name")
+            if ip_val and str(ip_val) not in associated_ips:
+                associated_ips.append(str(ip_val))
+        if "Certificate" in labels:
+            cert_info = {
+                "id": str(node.get("id")),
+                "sha256": str(props.get("sha256") or props.get("fingerprint") or ""),
+                "issuer": str(props.get("issuer") or props.get("issuer_cn") or ""),
+                "subject": str(props.get("subject_common_name") or props.get("subject") or ""),
+                "not_after": str(props.get("not_after") or props.get("valid_to") or ""),
+            }
+            if cert_info not in associated_certificates:
+                associated_certificates.append(cert_info)
+        if "Report" in labels:
+            rep_info = {
+                "id": str(props.get("id") or node.get("id")),
+                "source": str(props.get("source") or ""),
+                "confidence": str(props.get("confidence") or ""),
+                "threat": str(props.get("threat") or props.get("threat_type") or ""),
+                "url": str(props.get("url") or ""),
+            }
+            if rep_info not in associated_reports:
+                associated_reports.append(rep_info)
+        if "Nameserver" in labels:
+            ns_val = props.get("hostname") or props.get("name") or props.get("value")
+            if ns_val and str(ns_val).lower() not in associated_nameservers:
+                associated_nameservers.append(str(ns_val).lower())
+
+    registered_apex = registrable_domain(normalized_domain)
 
     missing_information = []
     if found and not evidence:
@@ -288,6 +358,11 @@ def investigate_domain(
         missing_information.append(
             "The graph does not reliably record whether passive enrichment "
             "was run."
+        )
+    if found and evidence and not enrichment_sources:
+        missing_information.append(
+            "Provider execution details for the enrichment run were not "
+            "recorded in the graph."
         )
     if malformed_enrichment_sources:
         missing_information.append(
@@ -328,10 +403,17 @@ def investigate_domain(
             )
         ),
         "data_availability": "AVAILABLE" if found else "NOT_FOUND",
+        "investigation_status": investigation_status,
+        "registered_domain": registered_apex,
         "discovery_status": discovery_status,
         "enrichment_status": enrichment_status,
         "enrichment_outcome": enrichment_outcome,
         "enrichment_sources": enrichment_sources,
+        "observed_sources": observed_sources,
+        "associated_ips": associated_ips,
+        "associated_certificates": associated_certificates,
+        "associated_reports": associated_reports,
+        "associated_nameservers": associated_nameservers,
         "assessment": {
             "verdict": verdict,
             "justification": justification,
