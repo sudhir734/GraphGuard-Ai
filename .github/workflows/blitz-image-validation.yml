@@ -70,7 +70,8 @@ jobs:
           exit 1
 
       - name: Record container memory footprint
-        run: docker stats --no-stream --format "Memory usage/limit: {{.MemUsage}}" graphguard-ci
+        run: |
+          docker stats --no-stream --format 'Memory usage/limit: {{.MemUsage}}' graphguard-ci
 
       - name: Verify graph data survives a container restart
         shell: bash
