@@ -4,6 +4,14 @@ set -eu
 : "${PORT:=8000}"
 : "${FALKORDB_PASSWORD:?Set a strong FALKORDB_PASSWORD in the host's encrypted environment settings}"
 
+# Persistent volumes may be mounted as root-owned. Repair ownership once at startup,
+# then drop privileges before launching FalkorDB and the API.
+if [ "$(id -u)" -eq 0 ]; then
+  mkdir -p /var/lib/falkordb/data
+  chown -R app:app /var/lib/falkordb/data
+  exec gosu app:app "$0" "$@"
+fi
+
 # Find the module supplied by the official FalkorDB server image rather than
 # hard-coding a path that may change between upstream image versions.
 FALKORDB_MODULE="$(find / -type f -name 'falkordb.so' -print -quit 2>/dev/null || true)"
