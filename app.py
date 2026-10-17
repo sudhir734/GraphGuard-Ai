@@ -15,6 +15,21 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 
+# Streamlit Community Cloud exposes configured values through st.secrets.
+# Mirror only documented connection settings before importing graph helpers.
+for _secret_key in (
+    "FALKORDB_HOST", "FALKORDB_PORT", "FALKORDB_GRAPH",
+    "FALKORDB_USERNAME", "FALKORDB_PASSWORD", "FALKORDB_TLS",
+    "GRAPHGUARD_API_URL",
+):
+    if not os.getenv(_secret_key):
+        try:
+            _secret_value = st.secrets.get(_secret_key)
+        except Exception:
+            _secret_value = None
+        if _secret_value is not None:
+            os.environ[_secret_key] = str(_secret_value)
+
 from api_destination import validate_api_base_url
 import graph_queries
 
