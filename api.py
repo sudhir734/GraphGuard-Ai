@@ -28,9 +28,9 @@ def _env_enabled(name: str, default: bool = False) -> bool:
     raise ValueError(f"{name} must be a boolean value.")
 
 
-def _require_feature_enabled(name: str, label: str) -> None:
+def _require_feature_enabled(name: str, label: str, *, default: bool = True) -> None:
     # The deployment template disables expensive/side-effecting public actions.
-    if not _env_enabled(name, default=True):
+    if not _env_enabled(name, default=default):
         raise HTTPException(
             status_code=403,
             detail=f"{label} is disabled on this deployment.",
@@ -211,13 +211,15 @@ def run_discovery(request: DiscoveryRunRequest) -> dict[str, Any]:
 
 @app.get("/discovery/status")
 def discovery_status() -> dict[str, Any]:
-    """Return the status and progress of any active or recent background discovery job."""
+    """Return discovery status only when discovery operations are enabled."""
+    _require_feature_enabled("GRAPHGUARD_ENABLE_DISCOVERY", "Discovery jobs")
     return discovery_engine.get_job_status()
 
 
 @app.get("/audit/summary")
 def audit_summary() -> dict[str, Any]:
-    """Return aggregated coverage and audit metrics from the batch audit store."""
+    """Return audit metrics only when the audit API is enabled."""
+    _require_feature_enabled("GRAPHGUARD_ENABLE_AUDIT_API", "Audit API")
     try:
         from domain_batch_audit import DomainBatchAuditStore, DEFAULT_DB_PATH
         store = DomainBatchAuditStore(DEFAULT_DB_PATH)
@@ -229,7 +231,8 @@ def audit_summary() -> dict[str, Any]:
 
 @app.get("/audit/manifests")
 def audit_manifests() -> list[dict[str, Any]]:
-    """Return registered batch audit datasets and their progress."""
+    """Return audit manifests only when the audit API is enabled."""
+    _require_feature_enabled("GRAPHGUARD_ENABLE_AUDIT_API", "Audit API")
     try:
         from domain_batch_audit import DomainBatchAuditStore, DEFAULT_DB_PATH
         store = DomainBatchAuditStore(DEFAULT_DB_PATH)
