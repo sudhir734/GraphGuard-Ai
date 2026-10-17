@@ -1,0 +1,41 @@
+# EXPERIMENTAL: single-container Blitz deployment.
+# Builds on the official FalkorDB server image so the graph module and Redis server
+# stay version-matched. Validate locally before publishing or deploying.
+FROM falkordb/falkordb-server:latest
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-venv python3-pip libgomp1 findutils ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 1000 app \
+    && useradd --uid 1000 --gid app --create-home --shell /usr/sbin/nologin app \
+    && mkdir -p /app /var/lib/falkordb/data \
+    && chown -R app:app /app /var/lib/falkordb/data
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH" \
+    FALKORDB_HOST=127.0.0.1 \
+    FALKORDB_PORT=6379 \
+    FALKORDB_GRAPH=GraphGuardDemo \
+    FALKORDB_TLS=false \
+    GRAPHGUARD_ENABLE_DISCOVERY=false \
+    GRAPHGUARD_ALLOW_LIVE_ENRICHMENT=false \
+    GRAPHGUARD_ENABLE_AUDIT_API=false
+
+RUN python3 -m venv "$VIRTUAL_ENV"
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY --chown=app:app . .
+COPY --chown=app:app blitz-start.sh /app/blitz-start.sh
+RUN chmod 0755 /app/blitz-start.sh
+
+# Blitz routes HTTP traffic to this port. FalkorDB binds only to loopback.
+EXPOSE 8000
+VOLUME ["/var/lib/falkordb/data"]
+USER 1000:1000
+ENTRYPOINT []
+CMD ["/app/blitz-start.sh"]
