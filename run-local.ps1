@@ -27,7 +27,7 @@ if ($LASTEXITCODE -ne 0) { throw "Docker image build failed." }
 $existing = docker ps -a --filter "name=^graphguard-local$" --format "{{.Names}}"
 if ($existing -eq "graphguard-local") { docker rm -f graphguard-local | Out-Null }
 Write-Host "Starting local FalkorDB + API. Graph data folder: $dataPath"
-$dockerArgs = @("run","-d","--name","graphguard-local","--restart","unless-stopped","-p","127.0.0.1:8000:8000","--mount","type=bind,source=$dataPath,target=/var/lib/falkordb/data","--env","FALKORDB_PASSWORD=$dbPassword","--env","FALKORDB_GRAPH=GraphGuardDemo","--env","FALKORDB_HOST=127.0.0.1","--env","FALKORDB_PORT=6379","--env","FALKORDB_TLS=false","--env","GRAPHGUARD_ENABLE_DISCOVERY=true","--env","GRAPHGUARD_ALLOW_LIVE_ENRICHMENT=true","--env","GRAPHGUARD_ENABLE_AUDIT_API=true",$image)
+$dockerArgs = @("run","-d","--name","graphguard-local","--restart","unless-stopped","-p","127.0.0.1:8000:8000","-p","127.0.0.1:16379:6379","--mount","type=bind,source=$dataPath,target=/var/lib/falkordb/data","--env","FALKORDB_PASSWORD=$dbPassword","--env","FALKORDB_GRAPH=GraphGuardDemo","--env","FALKORDB_HOST=127.0.0.1","--env","FALKORDB_PORT=6379","--env","FALKORDB_TLS=false","--env","GRAPHGUARD_ENABLE_DISCOVERY=true","--env","GRAPHGUARD_ALLOW_LIVE_ENRICHMENT=true","--env","GRAPHGUARD_ENABLE_AUDIT_API=true",$image)
 docker @dockerArgs | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "Failed to start GraphGuard local container." }
 Write-Host "Waiting for API and graph readiness..."
@@ -47,8 +47,18 @@ if (-not (Test-Path ".venv\Scripts\python.exe")) {
 Write-Host "Installing/verifying Python UI dependencies..."
 & ".\.venv\Scripts\python.exe" -m pip install -r requirements.txt
 if ($LASTEXITCODE -ne 0) { throw "Python dependency installation failed." }
-$startArgs = @{ FilePath=(Join-Path $PSScriptRoot ".venv\Scripts\python.exe"); ArgumentList=@("-m","streamlit","run","app.py","--server.address","127.0.0.1","--server.port","8501","--browser.gatherUsageStats","false"); WorkingDirectory=$PSScriptRoot; Environment=@{ GRAPHGUARD_API_URL="http://127.0.0.1:8000"; GRAPHGUARD_PUBLIC_DEMO="true" } }
-Start-Process @startArgs
+# Pass local-only settings to Streamlit; the graph port is bound to loopback only.
+$oldEnv = @{}
+foreach ($key in @("GRAPHGUARD_API_URL","GRAPHGUARD_PUBLIC_DEMO","FALKORDB_HOST","FALKORDB_PORT","FALKORDB_GRAPH","FALKORDB_PASSWORD","FALKORDB_TLS")) { $oldEnv[$key] = [Environment]::GetEnvironmentVariable($key, "Process") }
+$env:GRAPHGUARD_API_URL = "http://127.0.0.1:8000"
+$env:GRAPHGUARD_PUBLIC_DEMO = "false"
+$env:FALKORDB_HOST = "127.0.0.1"
+$env:FALKORDB_PORT = "16379"
+$env:FALKORDB_GRAPH = "GraphGuardDemo"
+$env:FALKORDB_PASSWORD = $dbPassword
+$env:FALKORDB_TLS = "false"
+Start-Process -FilePath (Join-Path $PSScriptRoot ".venv\Scripts\python.exe") -ArgumentList @("-m","streamlit","run","app.py","--server.address","127.0.0.1","--server.port","8501","--browser.gatherUsageStats","false") -WorkingDirectory $PSScriptRoot
+foreach ($key in $oldEnv.Keys) { [Environment]::SetEnvironmentVariable($key, $oldEnv[$key], "Process") }
 Start-Sleep -Seconds 3
 Start-Process "http://127.0.0.1:8501"
 Write-Host "GraphGuard AI is running locally:"
