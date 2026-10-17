@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: graphguard-ai-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: FALKORDB_HOST
+        sync: false
+      - key: FALKORDB_PORT
+        value: "6379"
+      - key: FALKORDB_GRAPH
+        value: GraphGuardDemo
+      - key: FALKORDB_USERNAME
+        sync: false
+      - key: FALKORDB_PASSWORD
+        sync: false
+      - key: FALKORDB_TLS
+        value: "true"
+      - key: GRAPHGUARD_ENABLE_DISCOVERY
+        value: "false"
+      - key: GRAPHGUARD_ALLOW_LIVE_ENRICHMENT
+        value: "false"
+      - key: PYTHON_VERSION
+        value: 3.12.10
