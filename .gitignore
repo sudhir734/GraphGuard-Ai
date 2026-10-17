@@ -26,3 +26,6 @@ scratch/
 # Allow a safe example configuration template
 !.env.example
 
+# Local GraphGuard launch state and persistent demo graph
+.local.env
+.local-data/
