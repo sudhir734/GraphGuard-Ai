@@ -1,0 +1,98 @@
+name: Blitz image validation
+
+on:
+  push:
+    branches:
+      - deployment/free-cloud
+    paths:
+      - "Dockerfile.blitz"
+      - "blitz-start.sh"
+      - "requirements-blitz.txt"
+      - "api.py"
+      - "graph_config.py"
+      - "graph_queries.py"
+      - "investigation_agent.py"
+      - "backend/**"
+      - "psl_utils.py"
+      - ".github/workflows/blitz-image-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: deployment/free-cloud
+
+      - name: Check startup script syntax
+        run: sh -n blitz-start.sh
+
+      - name: Build image (do not publish)
+        run: docker build --platform linux/amd64 -f Dockerfile.blitz -t graphguard-blitz-test:ci .
+
+      - name: Start container with a temporary persistent folder
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/graphguard-falkordb-data"
+          echo "GRAPHGUARD_TEST_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
+          docker run -d --name graphguard-ci \
+            -e FALKORDB_PASSWORD="$(openssl rand -hex 24)" \
+            -e PORT=8000 \
+            -v "$RUNNER_TEMP/graphguard-falkordb-data:/var/lib/falkordb/data" \
+            -p 127.0.0.1:18000:8000 \
+            graphguard-blitz-test:ci
+
+      - name: Wait for API and FalkorDB readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:18000/health/ready >/tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' graphguard-ci)" != "true" ]; then
+              docker logs graphguard-ci
+              exit 1
+            fi
+            sleep 2
+          done
+          docker logs graphguard-ci
+          exit 1
+
+      - name: Verify graph data survives a container restart
+        shell: bash
+        run: |
+          set -euo pipefail
+          PASSWORD="$(docker inspect graphguard-ci --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^FALKORDB_PASSWORD=//p')"
+          test -n "$PASSWORD"
+          docker exec -e REDISCLI_AUTH="$PASSWORD" graphguard-ci \
+            redis-cli --no-auth-warning GRAPH.QUERY GraphGuardDemo \
+            "CREATE (:Domain {name: 'persist.example'})"
+          docker restart graphguard-ci
+          for i in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:18000/health/ready >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          RESULT="$(docker exec -e REDISCLI_AUTH="$PASSWORD" graphguard-ci \
+            redis-cli --no-auth-warning GRAPH.QUERY GraphGuardDemo \
+            "MATCH (d:Domain {name: 'persist.example'}) RETURN d.name")"
+          echo "$RESULT"
+          echo "$RESULT" | grep -q "persist.example"
+
+      - name: Show logs if the job fails
+        if: failure()
+        run: docker logs graphguard-ci || true
+
+      - name: Remove test container
+        if: always()
+        run: docker rm -f graphguard-ci || true
