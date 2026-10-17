@@ -39,8 +39,12 @@ MATCH (c)<-[:DESCRIBES_CERTIFICATE]-(:Observation)<-[:HAS_OBSERVATION]-(d2:Domai
 WHERE d1 <> d2
 RETURN d1.name AS seed, c.serial_number AS shared_cert, d2.name AS connected_infrastructure
 ```
-- **Execution Speed:** FalkorDB executes this 4-relationship traversal in **under 8 milliseconds** over a 10,000+ entity graph.
-- **Explainability:** The resulting subgraphs map directly to human cognitive threat models and interactive vis-network canvas representations.
+
+### 1.3 Empirical Multi-Hop Benchmark (Isolated Synthetic Test)
+A dedicated, reproducible multi-hop test was executed on an isolated test graph (`GraphGuard_SyntheticMultiHopTest`) with the following measured timings:
+- **2-Hop Pivot (Co-occurrence across shared certificate):** **2.733 ms** (Found `adversary-pivot.synthetic`)
+- **4-Hop Multi-Hop Campaign Leaf Pivot (Seed -> Cert -> Pivot -> Nameserver -> Node3):** **2.803 ms** (Found `campaign-node3.synthetic`)
+- **Isolation Verification:** The test graph was deleted immediately following verification; zero nodes or edges were written to production.
 
 ---
 

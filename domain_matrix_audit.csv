@@ -1,0 +1,193 @@
+line_number,raw_input,normalized_domain,domain_type,validation_status,validation_error,investigation_status,assessment_verdict,data_availability,evidence_count,sources_queried,sources_failed,latency_ms,error_message,audited_at
+1,# GraphGuard AI — Multi-Category Domain Coverage Sample Fixture,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.573160+00:00
+1,# GraphGuard AI — Multi-Category Domain Coverage Sample Fixture,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.572193+00:00
+1,# GraphGuard AI — Multi-Category Domain Coverage Sample Fixture,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.164292+00:00
+2,# Category A: Valid Registered Domains,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.573160+00:00
+2,# Category A: Valid Registered Domains,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.572193+00:00
+2,# Category A: Valid Registered Domains,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.164292+00:00
+3,target.com,target.com,APEX_DOMAIN,VALID,,INVESTIGATED,NOT_ASSESSED,AVAILABLE,20,falkordb_read_only,,38.9,,2026-10-17T07:11:30.576954+00:00
+3,target.com,target.com,APEX_DOMAIN,VALID,,INVESTIGATED,NOT_ASSESSED,AVAILABLE,20,falkordb_read_only,,45.46,,2026-10-17T07:11:52.577245+00:00
+3,target.com,target.com,APEX_DOMAIN,VALID,,INVESTIGATED,NOT_ASSESSED,AVAILABLE,20,falkordb_read_only,,36.57,,2026-10-17T08:20:26.166955+00:00
+4,google.com,google.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.83,,2026-10-17T07:11:30.621341+00:00
+4,google.com,google.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.42,,2026-10-17T07:11:52.623415+00:00
+4,google.com,google.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.33,,2026-10-17T08:20:26.203664+00:00
+5,github.com,github.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.83,,2026-10-17T07:11:30.644418+00:00
+5,github.com,github.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,19.7,,2026-10-17T07:11:52.641670+00:00
+5,github.com,github.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.75,,2026-10-17T08:20:26.220155+00:00
+6,cloudflare.com,cloudflare.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.18,,2026-10-17T07:11:30.682565+00:00
+6,cloudflare.com,cloudflare.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.46,,2026-10-17T07:11:52.661559+00:00
+6,cloudflare.com,cloudflare.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.7,,2026-10-17T08:20:26.235189+00:00
+7,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.704616+00:00
+7,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.680455+00:00
+7,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.251955+00:00
+8,# Category B: Cross-Sector Public Domains,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.704616+00:00
+8,# Category B: Cross-Sector Public Domains,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.680455+00:00
+8,# Category B: Cross-Sector Public Domains,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.251955+00:00
+9,# Technology,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.704616+00:00
+9,# Technology,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.680455+00:00
+9,# Technology,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.251955+00:00
+10,microsoft.com,microsoft.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.27,,2026-10-17T07:11:30.705173+00:00
+10,microsoft.com,microsoft.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.34,,2026-10-17T07:11:52.680455+00:00
+10,microsoft.com,microsoft.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.7,,2026-10-17T08:20:26.251955+00:00
+11,# Education,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.726802+00:00
+11,# Education,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.697632+00:00
+11,# Education,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.266779+00:00
+12,mit.edu,mit.edu,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.47,,2026-10-17T07:11:30.726802+00:00
+12,mit.edu,mit.edu,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.49,,2026-10-17T07:11:52.697632+00:00
+12,mit.edu,mit.edu,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,15.71,,2026-10-17T08:20:26.266779+00:00
+13,# Government,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.747005+00:00
+13,# Government,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.715566+00:00
+13,# Government,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.282952+00:00
+14,usa.gov,usa.gov,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.35,,2026-10-17T07:11:30.747005+00:00
+14,usa.gov,usa.gov,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.32,,2026-10-17T07:11:52.715566+00:00
+14,usa.gov,usa.gov,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,13.5,,2026-10-17T08:20:26.282952+00:00
+15,# Finance,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.767748+00:00
+15,# Finance,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.733892+00:00
+15,# Finance,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.296580+00:00
+16,jpmorgan.com,jpmorgan.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.27,,2026-10-17T07:11:30.767748+00:00
+16,jpmorgan.com,jpmorgan.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,15.94,,2026-10-17T07:11:52.733892+00:00
+16,jpmorgan.com,jpmorgan.com,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.51,,2026-10-17T08:20:26.296580+00:00
+17,# Healthcare,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.789624+00:00
+17,# Healthcare,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.749959+00:00
+17,# Healthcare,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.311391+00:00
+18,who.int,who.int,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.09,,2026-10-17T07:11:30.789624+00:00
+18,who.int,who.int,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,21.14,,2026-10-17T07:11:52.749959+00:00
+18,who.int,who.int,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,19.24,,2026-10-17T08:20:26.311391+00:00
+19,# Media,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.810697+00:00
+19,# Media,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.771239+00:00
+19,# Media,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.330370+00:00
+20,bbc.co.uk,bbc.co.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.21,,2026-10-17T07:11:30.810697+00:00
+20,bbc.co.uk,bbc.co.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.58,,2026-10-17T07:11:52.771239+00:00
+20,bbc.co.uk,bbc.co.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,15.79,,2026-10-17T08:20:26.330370+00:00
+21,# Non-Profit,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.830799+00:00
+21,# Non-Profit,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.788239+00:00
+21,# Non-Profit,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.346284+00:00
+22,eff.org,eff.org,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,15.92,,2026-10-17T07:11:30.830799+00:00
+22,eff.org,eff.org,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,15.76,,2026-10-17T07:11:52.788239+00:00
+22,eff.org,eff.org,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.43,,2026-10-17T08:20:26.346284+00:00
+23,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.849787+00:00
+23,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.803735+00:00
+23,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.361312+00:00
+24,# Category C: Subdomains Supplied by Inventories,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.849787+00:00
+24,# Category C: Subdomains Supplied by Inventories,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.803735+00:00
+24,# Category C: Subdomains Supplied by Inventories,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.361312+00:00
+25,api.github.com,api.github.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.09,,2026-10-17T07:11:30.849787+00:00
+25,api.github.com,api.github.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.04,,2026-10-17T07:11:52.804270+00:00
+25,api.github.com,api.github.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.0,,2026-10-17T08:20:26.361312+00:00
+26,aws.amazon.com,aws.amazon.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.26,,2026-10-17T07:11:30.869578+00:00
+26,aws.amazon.com,aws.amazon.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.77,,2026-10-17T07:11:52.819906+00:00
+26,aws.amazon.com,aws.amazon.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,13.35,,2026-10-17T08:20:26.375209+00:00
+27,mail.google.com,mail.google.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.2,,2026-10-17T07:11:30.890178+00:00
+27,mail.google.com,mail.google.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.11,,2026-10-17T07:11:52.837027+00:00
+27,mail.google.com,mail.google.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,13.74,,2026-10-17T08:20:26.388829+00:00
+28,portal.azure.com,portal.azure.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.22,,2026-10-17T07:11:30.912004+00:00
+28,portal.azure.com,portal.azure.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,22.14,,2026-10-17T07:11:52.853763+00:00
+28,portal.azure.com,portal.azure.com,SUBDOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,13.85,,2026-10-17T08:20:26.402947+00:00
+29,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.931176+00:00
+29,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.875967+00:00
+29,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.416674+00:00
+30,# Category D: Multi-Label Public Suffixes,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:30.931176+00:00
+30,# Category D: Multi-Label Public Suffixes,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.875967+00:00
+30,# Category D: Multi-Label Public Suffixes,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.416674+00:00
+31,example.co.uk,example.co.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.71,,2026-10-17T07:11:30.931717+00:00
+31,example.co.uk,example.co.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,19.65,,2026-10-17T07:11:52.875967+00:00
+31,example.co.uk,example.co.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.06,,2026-10-17T08:20:26.417213+00:00
+32,app.github.io,app.github.io,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.89,,2026-10-17T07:11:30.951788+00:00
+32,app.github.io,app.github.io,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,22.18,,2026-10-17T07:11:52.896025+00:00
+32,app.github.io,app.github.io,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.79,,2026-10-17T08:20:26.431150+00:00
+33,test.gov.uk,test.gov.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.5,,2026-10-17T07:11:30.972332+00:00
+33,test.gov.uk,test.gov.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,21.7,,2026-10-17T07:11:52.918346+00:00
+33,test.gov.uk,test.gov.uk,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,13.91,,2026-10-17T08:20:26.446427+00:00
+34,services.qld.gov.au,services.qld.gov.au,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.9,,2026-10-17T07:11:30.993632+00:00
+34,services.qld.gov.au,services.qld.gov.au,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,23.0,,2026-10-17T07:11:52.940272+00:00
+34,services.qld.gov.au,services.qld.gov.au,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,12.55,,2026-10-17T08:20:26.460164+00:00
+35,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.014488+00:00
+35,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.962933+00:00
+35,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.472720+00:00
+36,# Category E: Internationalized Domain Names (IDNA / Punycode),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.014488+00:00
+36,# Category E: Internationalized Domain Names (IDNA / Punycode),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:52.962933+00:00
+36,# Category E: Internationalized Domain Names (IDNA / Punycode),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.472720+00:00
+37,xn--e1afmkfd.xn--p1ai,xn--e1afmkfd.xn--p1ai,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.72,,2026-10-17T07:11:31.014488+00:00
+37,xn--e1afmkfd.xn--p1ai,xn--e1afmkfd.xn--p1ai,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,22.14,,2026-10-17T07:11:52.962933+00:00
+37,xn--e1afmkfd.xn--p1ai,xn--e1afmkfd.xn--p1ai,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,12.83,,2026-10-17T08:20:26.473272+00:00
+38,испытание.рф,xn--80akhbyknj4f.xn--p1ai,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,17.8,,2026-10-17T07:11:31.037250+00:00
+38,испытание.рф,xn--80akhbyknj4f.xn--p1ai,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,24.37,,2026-10-17T07:11:52.987181+00:00
+38,испытание.рф,xn--80akhbyknj4f.xn--p1ai,APEX_DOMAIN,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,15.01,,2026-10-17T08:20:26.486985+00:00
+39,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.058201+00:00
+39,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.011738+00:00
+39,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.502310+00:00
+40,"# Category F: Normalization Edge Cases (Uppercase, Trailing Dots, Whitespace)",,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.058201+00:00
+40,"# Category F: Normalization Edge Cases (Uppercase, Trailing Dots, Whitespace)",,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.011738+00:00
+40,"# Category F: Normalization Edge Cases (Uppercase, Trailing Dots, Whitespace)",,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.502310+00:00
+41,TARGET.COM,target.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:31.058757+00:00
+41,TARGET.COM,target.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:53.011738+00:00
+41,TARGET.COM,target.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T08:20:26.502310+00:00
+42,example.org.,example.org,RESERVED_TEST,VALID,,NO_EVIDENCE_FOUND,NOT_ASSESSED,AVAILABLE,0,falkordb_read_only,,17.06,,2026-10-17T07:11:31.058757+00:00
+42,example.org.,example.org,RESERVED_TEST,VALID,,NO_EVIDENCE_FOUND,NOT_ASSESSED,AVAILABLE,0,falkordb_read_only,,27.22,,2026-10-17T07:11:53.011738+00:00
+42,example.org.,example.org,RESERVED_TEST,VALID,,NO_EVIDENCE_FOUND,NOT_ASSESSED,AVAILABLE,0,falkordb_read_only,,15.17,,2026-10-17T08:20:26.502310+00:00
+43,  cloudflare.com  ,cloudflare.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:31.080162+00:00
+43,  cloudflare.com  ,cloudflare.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:53.039251+00:00
+43,  cloudflare.com  ,cloudflare.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T08:20:26.517527+00:00
+44,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.080162+00:00
+44,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.039251+00:00
+44,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.517527+00:00
+45,# Category G: Invalid and Malformed Inputs (Should be rejected with clear errors),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.080162+00:00
+45,# Category G: Invalid and Malformed Inputs (Should be rejected with clear errors),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.039251+00:00
+45,# Category G: Invalid and Malformed Inputs (Should be rejected with clear errors),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.517527+00:00
+46,-badlabel.com,,INVALID_SYNTAX,INVALID,Normalization failure: Invalid domain label.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Normalization failure: Invalid domain label.,2026-10-17T07:11:31.080162+00:00
+46,-badlabel.com,,INVALID_SYNTAX,INVALID,Normalization failure: Invalid domain label.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Normalization failure: Invalid domain label.,2026-10-17T07:11:53.039251+00:00
+46,-badlabel.com,,INVALID_SYNTAX,INVALID,Normalization failure: Invalid domain label.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Normalization failure: Invalid domain label.,2026-10-17T08:20:26.517527+00:00
+47,..double.dot,,INVALID_SYNTAX,INVALID,Normalization failure: Invalid internationalized domain name.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Normalization failure: Invalid internationalized domain name.,2026-10-17T07:11:31.080162+00:00
+47,..double.dot,,INVALID_SYNTAX,INVALID,Normalization failure: Invalid internationalized domain name.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Normalization failure: Invalid internationalized domain name.,2026-10-17T07:11:53.039251+00:00
+47,..double.dot,,INVALID_SYNTAX,INVALID,Normalization failure: Invalid internationalized domain name.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Normalization failure: Invalid internationalized domain name.,2026-10-17T08:20:26.518065+00:00
+48,https://target.com/index.html,,URL_OR_PATH_REJECTED,INVALID,"Contains URL scheme, path, port, or whitespace.",NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,"Contains URL scheme, path, port, or whitespace.",2026-10-17T07:11:31.080162+00:00
+48,https://target.com/index.html,,URL_OR_PATH_REJECTED,INVALID,"Contains URL scheme, path, port, or whitespace.",NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,"Contains URL scheme, path, port, or whitespace.",2026-10-17T07:11:53.039251+00:00
+48,https://target.com/index.html,,URL_OR_PATH_REJECTED,INVALID,"Contains URL scheme, path, port, or whitespace.",NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,"Contains URL scheme, path, port, or whitespace.",2026-10-17T08:20:26.518065+00:00
+49,target.com:443,,URL_OR_PATH_REJECTED,INVALID,"Contains URL scheme, path, port, or whitespace.",NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,"Contains URL scheme, path, port, or whitespace.",2026-10-17T07:11:31.080162+00:00
+49,target.com:443,,URL_OR_PATH_REJECTED,INVALID,"Contains URL scheme, path, port, or whitespace.",NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,"Contains URL scheme, path, port, or whitespace.",2026-10-17T07:11:53.039251+00:00
+49,target.com:443,,URL_OR_PATH_REJECTED,INVALID,"Contains URL scheme, path, port, or whitespace.",NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,"Contains URL scheme, path, port, or whitespace.",2026-10-17T08:20:26.518065+00:00
+50,192.168.1.1,,IP_ADDRESS_REJECTED,INVALID,IP address literals are not allowed; domain name expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,IP address literals are not allowed; domain name expected.,2026-10-17T07:11:31.080162+00:00
+50,192.168.1.1,,IP_ADDRESS_REJECTED,INVALID,IP address literals are not allowed; domain name expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,IP address literals are not allowed; domain name expected.,2026-10-17T07:11:53.039251+00:00
+50,192.168.1.1,,IP_ADDRESS_REJECTED,INVALID,IP address literals are not allowed; domain name expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,IP address literals are not allowed; domain name expected.,2026-10-17T08:20:26.518065+00:00
+51,co.uk,co.uk,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T07:11:31.080162+00:00
+51,co.uk,co.uk,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T07:11:53.039251+00:00
+51,co.uk,co.uk,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T08:20:26.518065+00:00
+52,com,com,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T07:11:31.080162+00:00
+52,com,com,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T07:11:53.039251+00:00
+52,com,com,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T08:20:26.518065+00:00
+53,github.io,github.io,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T07:11:31.080162+00:00
+53,github.io,github.io,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T07:11:53.039796+00:00
+53,github.io,github.io,PUBLIC_SUFFIX_REJECTED,INVALID,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Bare public suffix (TLD/registry suffix) rejected; registrable domain expected.,2026-10-17T08:20:26.518065+00:00
+54,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.080162+00:00
+54,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.039796+00:00
+54,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.518065+00:00
+55,# Category H: Reserved Testing & Documentation Names (RFC 2606 / RFC 6761),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.080162+00:00
+55,# Category H: Reserved Testing & Documentation Names (RFC 2606 / RFC 6761),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.039796+00:00
+55,# Category H: Reserved Testing & Documentation Names (RFC 2606 / RFC 6761),,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.518065+00:00
+56,example.com,example.com,RESERVED_TEST,VALID,,NO_EVIDENCE_FOUND,NOT_ASSESSED,AVAILABLE,0,falkordb_read_only,,17.44,,2026-10-17T07:11:31.080162+00:00
+56,example.com,example.com,RESERVED_TEST,VALID,,NO_EVIDENCE_FOUND,NOT_ASSESSED,AVAILABLE,0,falkordb_read_only,,25.25,,2026-10-17T07:11:53.039796+00:00
+56,example.com,example.com,RESERVED_TEST,VALID,,NO_EVIDENCE_FOUND,NOT_ASSESSED,AVAILABLE,0,falkordb_read_only,,13.87,,2026-10-17T08:20:26.518631+00:00
+57,system.invalid,system.invalid,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.64,,2026-10-17T07:11:31.100730+00:00
+57,system.invalid,system.invalid,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,22.14,,2026-10-17T07:11:53.065121+00:00
+57,system.invalid,system.invalid,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.6,,2026-10-17T08:20:26.532252+00:00
+58,gateway.localhost,gateway.localhost,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,19.06,,2026-10-17T07:11:31.121258+00:00
+58,gateway.localhost,gateway.localhost,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,21.74,,2026-10-17T07:11:53.087441+00:00
+58,gateway.localhost,gateway.localhost,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,14.36,,2026-10-17T08:20:26.547031+00:00
+59,test.test,test.test,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,16.48,,2026-10-17T07:11:31.143671+00:00
+59,test.test,test.test,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,18.07,,2026-10-17T07:11:53.109652+00:00
+59,test.test,test.test,RESERVED_TEST,VALID,,NOT_FOUND,NOT_ASSESSED,NOT_FOUND,0,falkordb_read_only,,12.66,,2026-10-17T08:20:26.561851+00:00
+60,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.164804+00:00
+60,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.127600+00:00
+60,,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.574637+00:00
+61,# Duplicates to verify deduplication suppression,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:31.164804+00:00
+61,# Duplicates to verify deduplication suppression,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T07:11:53.127600+00:00
+61,# Duplicates to verify deduplication suppression,,INVALID_SYNTAX,INVALID,Empty or commented line.,NOT_ASSESSED,NOT_ASSESSED,UNAVAILABLE,0,,,0.0,Empty or commented line.,2026-10-17T08:20:26.574637+00:00
+62,target.com,target.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:31.164804+00:00
+62,target.com,target.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:53.127600+00:00
+62,target.com,target.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T08:20:26.574637+00:00
+63,google.com,google.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:31.164804+00:00
+63,google.com,google.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:53.127600+00:00
+63,google.com,google.com,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T08:20:26.574637+00:00
+64,mit.edu,mit.edu,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:31.164804+00:00
+64,mit.edu,mit.edu,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T07:11:53.128155+00:00
+64,mit.edu,mit.edu,APEX_DOMAIN,SKIPPED_DUPLICATE,Domain already processed in this manifest.,NOT_ASSESSED,NOT_ASSESSED,AVAILABLE,0,,,0.0,,2026-10-17T08:20:26.574637+00:00

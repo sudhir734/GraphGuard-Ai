@@ -54,11 +54,14 @@ flowchart TD
 Detailed technical documentation and audit deliverables produced for the hackathon release:
 
 - [AUDIT_FINDINGS.md](file:///C:/Users/gunna/Desktop/graphguard-ai/AUDIT_FINDINGS.md) — Technical root cause analysis of the 3.8 ms lookup vs live fetch, Windows TLS bug, and URLhaus resilience.
+- [DOMAIN_TEST_MATRIX.md](file:///C:/Users/gunna/Desktop/graphguard-ai/DOMAIN_TEST_MATRIX.md) — Multi-domain test matrix across categories A through L and batch coverage engine results.
+- [LIVE_PROVIDER_TEST_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/LIVE_PROVIDER_TEST_REPORT.md) — Live provider contracts and empirical benchmarks across DoH, RDAP, crt.sh, and URLhaus.
 - [LIVE_PIPELINE_VERIFICATION.md](file:///C:/Users/gunna/Desktop/graphguard-ai/LIVE_PIPELINE_VERIFICATION.md) — Empirical benchmarks across Cloudflare DoH, RDAP, crt.sh, and URLhaus.
 - [GRAPH_INTEGRITY_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/GRAPH_INTEGRITY_REPORT.md) — FalkorDB graph centrality proof, 10,235 node baseline integrity, and read-only verification.
 - [SECURITY_REVIEW.md](file:///C:/Users/gunna/Desktop/graphguard-ai/SECURITY_REVIEW.md) — TLS/SSL certifi policy, passive collection boundary, and credential redaction engine.
+- [PERFORMANCE_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/PERFORMANCE_REPORT.md) — Monotonic latency measurements (min, median, mean, p95) across stored and live paths.
 - [DEMO_RUNBOOK.md](file:///C:/Users/gunna/Desktop/graphguard-ai/DEMO_RUNBOOK.md) — Step-by-step 5-minute demonstration script for hackathon judges.
-- [FINAL_READINESS_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/FINAL_READINESS_REPORT.md) — Hackathon Track 1 sign-off and direct answers to all 11 audit questions.
+- [FINAL_READINESS_REPORT.md](file:///C:/Users/gunna/Desktop/graphguard-ai/FINAL_READINESS_REPORT.md) — Master adversarial audit sign-off and direct answers to all 18 evaluation questions.
 
 ## Requirements
 
