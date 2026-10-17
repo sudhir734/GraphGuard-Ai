@@ -103,7 +103,7 @@ jobs:
             "MATCH (d:Domain {name: 'persist.example'}) RETURN d.name")"
           echo "$RESULT"
           echo "$RESULT" | grep -q "persist.example"
-          docker stats --no-stream --format "Memory usage/limit after restart: {{.MemUsage}}" graphguard-ci
+          docker stats --no-stream --format 'Memory usage/limit after restart: {{.MemUsage}}' graphguard-ci
 
       - name: Show logs if the job fails
         if: failure()
